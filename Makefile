@@ -1,5 +1,6 @@
 # Parametros alteraveis
 
+CXX = c++
 CXXFLAGS = -std=c++11 -g -Wall -O3
 SRC := main.cc brick.cc background.cc texture.cc
 OBJ := $(SRC:%.cc=build/%.o)
