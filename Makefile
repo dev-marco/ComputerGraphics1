@@ -1,7 +1,7 @@
 # Parametros alteraveis
 
 CXXFLAGS = -std=c++11 -g -Wall -O3
-SRC := main.cc brick.cc
+SRC := main.cc brick.cc background.cc texture.cc
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
@@ -29,9 +29,8 @@ autodeps deps: $(DEP)
 deps/%.d: src/%.cc
 	@$(CXX) $(CXXFLAGS) -MM -MT $(@:deps/%.d=build/%.o) -o $@ $<
 
-# check test: all
-# 	@echo 'Testing'
-# 	@./test.sh $(ARGS)
+check test: all
+	bin/$(NAME)
 
 .PHONY: clean
 
