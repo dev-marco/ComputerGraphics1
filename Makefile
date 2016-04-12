@@ -1,7 +1,7 @@
 # Parametros alteraveis
 
 CXXFLAGS = -std=c++11 -g -Wall -O3
-SRC := main.cc
+SRC := main.cc brick.cc
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
