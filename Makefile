@@ -1,7 +1,7 @@
 # Parametros alteraveis
 
 CXX = c++
-CXXFLAGS = -std=c++11 -g -Wall -O3
+CXXFLAGS = -std=c++11 -g -Wall -O3 -lglfw3 -lopengl32 -lgdi32
 SRC := main.cc brick.cc background.cc texture.cc
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
@@ -16,7 +16,7 @@ ALL := bin/$(NAME)
 all default: $(ALL)
 
 $(ALL): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $(ALL) $(OBJ)
+	$(CXX) -o $(ALL) $(OBJ) $(CXXFLAGS)
 
 build: $(OBJ)
 	@:
