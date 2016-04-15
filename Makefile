@@ -1,11 +1,17 @@
 # Parametros alteraveis
 
 CXX = c++
-CXXFLAGS = -std=c++11 -g -Wall -O3 -lglfw3 -lopengl32 -lgdi32
+CXXFLAGS = -std=c++11 -g -Wall -O3 -lglfw3
 SRC := main.cc brick.cc background.cc texture.cc
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
+
+ifeq ($(OS), Windows_NT)
+CXXFLAGS += -lopengl32 -lgdi32
+else
+CXXFLAGS += -lGL -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
+endif
 
 # Fim dos parametros
 
