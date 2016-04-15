@@ -8,7 +8,7 @@ DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
 
 ifeq ($(OS), Windows_NT)
-CXXFLAGS += -lopengl32 -lgdi32
+CXXFLAGS += -lopengl32 -lgdi32 -static-libstdc++ -static-libgcc
 else
 CXXFLAGS += -lGL -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
 endif
