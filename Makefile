@@ -11,7 +11,7 @@ NAME = tp1
 ifeq ($(OS), Windows_NT)
 CXXLIBS := -lglfw3 -lopengl32 -lgdi32 -static-libstdc++ -static-libgcc
 else
-CXXLIBS := -lglfw3 -lGL -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
+CXXLIBS := -lglfw3 -lGL -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
 endif
 
 # Fim dos parametros
