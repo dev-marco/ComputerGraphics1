@@ -12,7 +12,9 @@
 
 class Object {
 
-    bool display, exists = true, markedToDestroy = false;
+    static std::unordered_set<const Object *> invalid;
+
+    bool display, markedToDestroy = false;
     Mesh *mesh, *collider = NULL;
     Background *background;
     std::unordered_set<Object *> children;
@@ -20,31 +22,42 @@ class Object {
     std::valarray<double> position, speed, acceleration;
 
     void delayedDestroy () {
+
         if (this->markedToDestroy) {
 
+            this->markedToDestroy = false;
+
             if (Object::isValid(this)) {
+
+                auto children(this->children);
+
+                this->display = false;
 
                 this->beforeDestroy();
 
                 this->removeParent();
-                delete this->background;
-                delete this->mesh;
-                for (const auto &child : this->children) {
+
+                for (const auto &child : children) {
                     child->destroy(true);
                 }
                 this->children.clear();
-                this->exists = false;
-                this->display = false;
+
+                delete this->background;
+                delete this->mesh;
+
+                Object::invalid.insert(this);
 
                 this->afterDestroy();
+
+                delete this;
             }
         }
     }
 
 public:
 
-    static bool isValid (const Object *obj) {
-        return obj && *obj;
+    inline static bool isValid (const Object *obj) {
+        return Object::invalid.find(obj) == Object::invalid.end();
     }
 
     inline Object (
@@ -54,7 +67,9 @@ public:
         Background *_background = new Background(),
         const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
         const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0}
-    ) : display(_display), mesh(_mesh), background(_background), position(_position.data(), 3), speed(_speed.data(), 3), acceleration(_acceleration.data(), 3) {};
+    ) : display(_display), mesh(_mesh), background(_background), position(_position.data(), 3), speed(_speed.data(), 3), acceleration(_acceleration.data(), 3) {
+        Object::invalid.erase(this);
+    };
 
     void detectCollisions () {
 
@@ -72,6 +87,8 @@ public:
             child++;
         }
     }
+
+    virtual ~Object () {}
 
     bool detectCollision (const Object *other) const {
         return false;
@@ -111,16 +128,18 @@ public:
         return this->children;
     }
 
-    void update () {
+    void update (double now, unsigned tick) {
         if (Object::isValid(this)) {
+
+            auto children(this->children);
 
             this->beforeUpdate();
 
             this->position += this->speed;
             this->speed += this->acceleration;
 
-            for (const auto &child : this->children) {
-                child->update();
+            for (const auto &child : children) {
+                child->update(now, tick);
             }
 
             this->afterUpdate();
@@ -149,6 +168,7 @@ public:
     }
 
     void destroy (bool now = false) {
+
         this->markedToDestroy = true;
         if (now) {
             this->delayedDestroy();
@@ -156,7 +176,7 @@ public:
     }
 
     inline operator bool () const {
-        return this->exists;
+        return Object::isValid(this);
     }
 
     virtual void onCollision (const Object *other) {}
