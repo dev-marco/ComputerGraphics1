@@ -14,20 +14,23 @@ class Mesh {
 
     std::valarray<double> position;
     std::vector<std::shared_ptr<Mesh>> children;
-    bool collides = true;
 
 public:
     static constexpr double PI = 3.14159265359;
 
-    Mesh (const std::array<double, 3> &_position = { 0.0, 0.0, 0.0 }, bool _collides = true) :
-        position(_position.data(), 3), collides(_collides) {};
+    Mesh (const std::array<double, 3> &_position = { 0.0, 0.0, 0.0 }) :
+        position(_position.data(), 3) {};
+
+    virtual ~Mesh () {}
 
     void draw (const std::valarray<double> &position, const Background *background, double ratio = 1.0) const {
 
-        this->makeDraw(position + this->position, background, ratio);
+        std::valarray<double> offset = position + this->position;
+
+        this->makeDraw(offset, background, ratio);
 
         for (const auto &mesh : this->children) {
-            mesh->draw(position + this->position, background, ratio);
+            mesh->draw(offset, background, ratio);
         }
     }
 
@@ -41,8 +44,6 @@ public:
 
     virtual void makeDraw (const std::valarray<double> &position, const Background *background, double ratio) const {};
 
-    static const Mesh NONE;
-
 };
 
 class Polygon2D : public Mesh {
@@ -52,8 +53,8 @@ class Polygon2D : public Mesh {
 
 public:
 
-    Polygon2D (const std::array<double, 3> &_position, double _radius, int _sides, double _angle = 0.0, bool _collides = true) :
-        Mesh(_position, _collides), radius(_radius), angle(_angle), sides(_sides) {};
+    Polygon2D (const std::array<double, 3> &_position, double _radius, int _sides, double _angle = 0.0) :
+        Mesh(_position), radius(_radius), angle(_angle), sides(_sides) {};
 
     void makeDraw (const std::valarray<double> &position, const Background *background, double ratio) const {
 
@@ -77,8 +78,8 @@ public:
 
 class Sphere2D : public Polygon2D {
 public:
-    Sphere2D (const std::array<double, 3> &_position, double _radius, bool _collides = true) :
-        Polygon2D (_position, _radius, 360, 0.0, _collides) {}
+    Sphere2D (const std::array<double, 3> &_position, double _radius) :
+        Polygon2D (_position, _radius, 360, 0.0) {}
 };
 
 class Rectangle2D : virtual public Mesh {
@@ -87,8 +88,8 @@ class Rectangle2D : virtual public Mesh {
 
 public:
 
-    Rectangle2D (const std::array<double, 3> &_position, double _width, double _height, bool _collides = true) :
-        Mesh(_position, _collides), width(_width), height(_height) {};
+    Rectangle2D (const std::array<double, 3> &_position, double _width, double _height) :
+        Mesh(_position), width(_width), height(_height) {};
 
     void makeDraw (const std::valarray<double> &position, const Background *background, double ratio) const {
 
