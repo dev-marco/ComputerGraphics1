@@ -10,8 +10,8 @@ class Background {
 
     public:
         Background () {};
+        virtual ~Background () {};
         virtual void apply () const {};
-        static const Background NONE;
 };
 
 class BackgroundColor : virtual public Background {
