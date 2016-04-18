@@ -13,7 +13,7 @@ public:
 
     Window (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share);
 
-    void addObject (Object &obj) {
+    void addObject (Object *obj) {
         root.addChild(obj);
     }
 
