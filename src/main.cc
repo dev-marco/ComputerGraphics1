@@ -25,7 +25,19 @@ int main (int argc, const char **argv) {
 
     if (window) {
 
+        unsigned id;
+
         window.makeCurrentContext();
+
+        id = window.setTimeout([ &window, &id ] () mutable {
+            static int count = 0;
+            std::cout << "timeout " << count << std::endl << "time " << glfwGetTime() << std::endl << std::endl;
+            count++;
+            if (count > 0) {
+                window.clearTimeout(id);
+            }
+            return true;
+        }, 1.5);
 
         Event::Event<Event::MouseMove>::add(window.get(), [](GLFWwindow *window, double x, double y, double posx, double posy) {
 
@@ -50,6 +62,18 @@ int main (int argc, const char **argv) {
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
+
+            static int t_last = 0;
+            int t = glfwGetTime() * 10;
+            if (t != t_last) {
+                t_last = t;
+                if (Object::isValid(rect)) {
+                    rect->destroy();
+                } else {
+                    rect = new Brick({-0.1, -0.04, 0.0}, 0.2, 0.08, new BackgroundColor(Color::rgba(100, 0, 255, 0.5)));
+                    window.addObject(rect);
+                }
+            }
 
             window.draw();
             window.update();
