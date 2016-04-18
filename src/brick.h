@@ -4,23 +4,20 @@
 #include <memory>
 #include <array>
 #include <valarray>
-#include "background.h"
+#include "object.h"
 
-class Brick {
-
-    const Background& background;
-    std::valarray<double> position, speed, acceleration;
-
+class Brick : public Object {
 public:
-    Brick (const Background &_background, const std::array<double, 2> &_position, const std::array<double, 2> &_speed, const std::array<double, 2> &_acceleration) :
-        background(_background), position(_position.data(), 2), speed(_speed.data(), 2), acceleration(_acceleration.data(), 2) {};
-    Brick (const Background &_background, const std::array<double, 2> &_position, const std::array<double, 2> &_speed) : Brick(_background, _position, _speed, { 0.0, 0.0 }) {};
-    Brick (const Background &_background, const std::array<double, 2> &_position) : Brick(_background, _position, { 0.0, 0.0 }, { 0.0, 0.0 }) {};
+    Brick (
+        const std::array<double, 3> &_position,
+        double _width,
+        double _height,
+        Background *_background,
+        const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
+        const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0}
+    ) : Object(_position, true, new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration) {}
 
-    void onUpdate () {
-        speed += acceleration;
-        position += speed;
-    }
+    std::string getType () const { return "brick"; }
 
 };
 
