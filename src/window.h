@@ -49,13 +49,12 @@ public:
     }
 
     unsigned sync (double start_time, unsigned fps = 60) {
-        double frame_time = 1.0 / (double) fps, now = glfwGetTime();
+        double frame_time = 1.0 / static_cast<double>(fps), now = glfwGetTime();
         if ((start_time + frame_time) > now) {
             usleep((start_time + frame_time - glfwGetTime()) * 1000000.0);
             return fps;
         }
-        frame_time = now - start_time;
-        return (1.0 / frame_time);
+        return static_cast<unsigned>(round(1.0 / (now - start_time)));
     }
 
     unsigned setTimeout (const std::function<bool()> &func, double interval) {
@@ -82,13 +81,13 @@ public:
             steps = ceil(total_time / 0.01);
         }
 
-        delta = 1.0 / (double) steps;
+        delta = 1.0 / static_cast<double>(steps);
 
         return this->setTimeout ([ delta, func ] () -> bool {
             static double progress = 0.0;
             progress = std::min(1.0, progress + delta);
             return func(progress) && progress < 1.0;
-        }, total_time / steps);
+        }, total_time * delta);
     }
 
     void draw () {
