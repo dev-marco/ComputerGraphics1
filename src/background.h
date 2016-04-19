@@ -16,10 +16,14 @@ class Background {
 
 class BackgroundColor : virtual public Background {
 
-    const Color color;
+    Color color;
 
 public:
     BackgroundColor (const Color &_color) : color(_color) {};
+
+    void setColor (const Color &_color) {
+        this->color = _color;
+    }
 
     void apply () const {
         this->color.apply();
