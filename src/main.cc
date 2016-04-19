@@ -12,7 +12,7 @@ int main (int argc, const char **argv) {
         return -1;
     }
 
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     Window window = Window(720, 720, "Trabalho Pratico 1", NULL, NULL);
 
@@ -28,11 +28,14 @@ int main (int argc, const char **argv) {
     if (window) {
 
         unsigned id;
+        double last = glfwGetTime();
 
         window.makeCurrentContext();
 
-        id = window.setTimeout([ &window, &id ] () mutable {
-            std::cout << "1.5 seconds" << std::endl;
+        id = window.setTimeout([ &window, &id, &last ] () mutable {
+            double now = glfwGetTime();
+            std::cout << (now - last) << " seconds" << std::endl;
+            last = now;
             return true;
         }, 1.5);
 
@@ -49,20 +52,32 @@ int main (int argc, const char **argv) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         while (!window.shouldClose()) {
-            double ratio;
-            int width, height;
-            double start_time = glfwGetTime();
+            int width, height, min_dim;
+            double width_limit, height_limit, start_time = glfwGetTime();
 
             window.getFramebufferSize(width, height);
 
-            ratio = width / (double) height;
-            glViewport(0, 0, width, height);
+            min_dim = std::min(width, height);
+
+            glViewport((width - min_dim) / 2, (height - min_dim) / 2, min_dim, min_dim);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(-ratio, ratio, -1.0, 1.0, 1.0, -1.0);
+
+            // FIXME
+            width_limit = (static_cast<double>(width) - static_cast<double>(min_dim)) / (2.0 * width) + 1.0;
+            height_limit = (static_cast<double>(height) - static_cast<double>(min_dim)) / (2.0 * height) + 1.0;
+
+            glOrtho(
+                -width_limit,
+                width_limit,
+                -height_limit,
+                height_limit,
+                1.0,
+                -1.0
+            );
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
@@ -85,7 +100,7 @@ int main (int argc, const char **argv) {
             window.swapBuffers();
             glfwPollEvents();
 
-            std::cout << window.sync(start_time, 60) << " FPS" << std::endl;
+            window.sync(start_time, 60);
         }
 
     }
