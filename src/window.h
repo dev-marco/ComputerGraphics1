@@ -3,7 +3,9 @@
 
 #include <functional>
 #include <map>
+#include <unistd.h>
 #include <GLFW/glfw3.h>
+#include "event.h"
 #include "object.h"
 
 class Window {
@@ -46,6 +48,16 @@ public:
         tick_counter++;
     }
 
+    unsigned sync (double start_time, unsigned fps = 60) {
+        double frame_time = 1.0 / (double) fps, now = glfwGetTime();
+        if ((start_time + frame_time) > now) {
+            usleep((start_time + frame_time - glfwGetTime()) * 1000000.0);
+            return fps;
+        }
+        frame_time = now - start_time;
+        return (1.0 / frame_time);
+    }
+
     unsigned setTimeout (const std::function<bool()> &func, double interval) {
 
         double now = glfwGetTime();
@@ -62,8 +74,21 @@ public:
         this->timeouts.erase(id);
     }
 
-    unsigned animate (const std::function<bool(double)> &func, double total_time, unsigned steps) {
+    unsigned animate (const std::function<bool(double)> &func, double total_time, unsigned steps = 0) {
 
+        double delta;
+
+        if (steps == 0) {
+            steps = ceil(total_time / 0.01);
+        }
+
+        delta = 1.0 / (double) steps;
+
+        return this->setTimeout ([ delta, func ] () -> bool {
+            static double progress = 0.0;
+            progress = std::min(1.0, progress + delta);
+            return func(progress) && progress < 1.0;
+        }, total_time / steps);
     }
 
     void draw () {
@@ -80,6 +105,15 @@ public:
 
     void swapBuffers () {
         glfwSwapBuffers(this->window);
+    }
+
+    void getFramebufferSize (int &width, int &height) {
+        glfwGetFramebufferSize(this->window, &width, &height);
+    }
+
+    template <typename EventType>
+    void event (typename EventType::FunctionType func, const std::string &id = "") {
+        Event::Event<EventType>::add(this->window, func, id);
     }
 
     GLFWwindow *get () {
