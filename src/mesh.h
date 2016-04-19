@@ -18,7 +18,11 @@ class Mesh {
 public:
     static constexpr double PI = 3.14159265359;
 
-    static std::valarray<double> closestPoint2D(std::valarray<double> ray_start, std::valarray<double> ray_end, std::valarray<double> point){
+    static std::valarray<double> closestPoint2D (
+        std::valarray<double> ray_start,
+        std::valarray<double> ray_end,
+        std::valarray<double> point
+    ) {
 
         double A1 = ray_end[1] - ray_start[1], B1 = ray_start[0] - ray_end[0];
 
@@ -133,7 +137,7 @@ public:
 
     void makeDraw (const std::valarray<double> &position, const Background *background, double ratio) const {
 
-        double step = (PI * 2.0) / (double) this->sides;
+        double step = (PI * 2.0) / static_cast<double>(this->sides);
         glBegin(GL_TRIANGLE_FAN);
 
         background->apply();
