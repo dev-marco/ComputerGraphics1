@@ -53,7 +53,6 @@ int main (int argc, const char **argv) {
 
         while (!window.shouldClose()) {
             int width, height, min_dim;
-            double width_limit, height_limit, start_time = glfwGetTime();
 
             window.getFramebufferSize(width, height);
 
@@ -63,21 +62,7 @@ int main (int argc, const char **argv) {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-
-            // FIXME
-            width_limit = (static_cast<double>(width) - static_cast<double>(min_dim)) / (2.0 * width) + 1.0;
-            height_limit = (static_cast<double>(height) - static_cast<double>(min_dim)) / (2.0 * height) + 1.0;
-
-            glOrtho(
-                -width_limit,
-                width_limit,
-                -height_limit,
-                height_limit,
-                1.0,
-                -1.0
-            );
+            Window::perspective(65.0, static_cast<double>(width) / height, 0, 1000);
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
@@ -100,7 +85,7 @@ int main (int argc, const char **argv) {
             window.swapBuffers();
             glfwPollEvents();
 
-            window.sync(start_time, 60);
+            window.sync(60);
         }
 
     }
