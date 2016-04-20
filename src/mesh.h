@@ -10,13 +10,14 @@
 #include <cmath>
 #include "background.h"
 
+#define M_PI 3.141592653589793238462643383279502884L
+
 class Mesh {
 
     std::valarray<double> position;
     std::vector<std::shared_ptr<Mesh>> children;
 
 public:
-    static constexpr double PI = 3.14159265359;
 
     static std::valarray<double> closestPoint2D (
         std::valarray<double> ray_start,
@@ -137,7 +138,7 @@ public:
 
     void makeDraw (const std::valarray<double> &position, const Background *background, double ratio) const {
 
-        double step = (PI * 2.0) / static_cast<double>(this->sides);
+        double step = (M_PI * 2.0) / static_cast<double>(this->sides);
         glBegin(GL_TRIANGLE_FAN);
 
         background->apply();
