@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <array>
-#include <vector>
+#include <stack>
 #include <unordered_set>
 #include <iostream>
 #include <valarray>
@@ -13,43 +13,43 @@
 class Object {
 
     static std::unordered_set<const Object *> invalid;
+    static std::stack<Object *> marked;
 
-    bool display, markedToDestroy = false;
+    bool display;
     Mesh *mesh, *collider = NULL;
     Background *background;
     std::unordered_set<Object *> children;
     Object *parent = NULL;
     std::valarray<double> position, speed, acceleration;
 
-    void delayedDestroy () {
+    static void delayedDestroy () {
 
-        if (this->markedToDestroy) {
+        while (!Object::marked.empty()) {
 
-            this->markedToDestroy = false;
+            auto obj = Object::marked.top();
 
-            if (Object::isValid(this)) {
+            Object::marked.pop();
 
-                auto children(this->children);
+            if (Object::isValid(obj)) {
 
-                this->display = false;
+                obj->beforeDestroy();
 
-                this->beforeDestroy();
+                obj->removeParent();
 
-                this->removeParent();
-
-                for (const auto &child : children) {
-                    child->destroy(true);
+                for (const auto &child : obj->getChildren()) {
+                    child->destroy();
                 }
-                this->children.clear();
 
-                delete this->background;
-                delete this->mesh;
+                obj->children.clear();
 
-                Object::invalid.insert(this);
+                delete obj->background;
+                delete obj->mesh;
 
-                this->afterDestroy();
+                Object::invalid.insert(obj);
 
-                delete this;
+                obj->afterDestroy();
+
+                delete obj;
             }
         }
     }
@@ -88,7 +88,9 @@ public:
         }
     }
 
-    virtual ~Object () {}
+    virtual ~Object () {
+        Object::invalid.insert(this);
+    }
 
     bool detectCollision (const Object *other) const {
         return false;
@@ -129,11 +131,17 @@ public:
     }
 
     void update (double now, unsigned tick) {
+
+        static bool destroy_shared = true;
+        bool destroy_local = destroy_shared;
+
+        destroy_shared = false;
+
         if (Object::isValid(this)) {
 
             auto children(this->children);
 
-            this->beforeUpdate();
+            this->beforeUpdate(now, tick);
 
             this->position += this->speed;
             this->speed += this->acceleration;
@@ -142,9 +150,12 @@ public:
                 child->update(now, tick);
             }
 
-            this->afterUpdate();
+            this->afterUpdate(now, tick);
+        }
 
-            this->delayedDestroy();
+        if (destroy_local) {
+            destroy_shared = true;
+            Object::delayedDestroy();
         }
     }
 
@@ -167,12 +178,9 @@ public:
         }
     }
 
-    void destroy (bool now = false) {
-
-        this->markedToDestroy = true;
-        if (now) {
-            this->delayedDestroy();
-        }
+    void destroy () {
+        this->display = false;
+        Object::marked.push(this);
     }
 
     inline operator bool () const {
@@ -182,8 +190,8 @@ public:
     virtual void onCollision (const Object *other) {}
     virtual void beforeDestroy () {}
     virtual void afterDestroy () {}
-    virtual void beforeUpdate () {}
-    virtual void afterUpdate () {}
+    virtual void beforeUpdate (double now, unsigned tick) {}
+    virtual void afterUpdate (double now, unsigned tick) {}
     virtual void beforeDraw () const {}
     virtual void afterDraw () const {}
 
