@@ -8,6 +8,8 @@
 #include "event.h"
 #include "object.h"
 
+#define M_PI 3.141592653589793238462643383279502884L
+
 class Window {
 
     GLFWwindow *window;
@@ -16,6 +18,17 @@ class Window {
     unsigned tick_counter = 0, timeout_counter = 0;
 
 public:
+
+    static void perspective (double fovy, double aspect, double zNear, double zFar) {
+        double xmin, xmax, ymin, ymax;
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        ymax = zNear * tan(fovy * M_PI / 360.0);
+        ymin = -ymax;
+        xmin = ymin * aspect;
+        xmax = ymax * aspect;
+        glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
+    }
 
     Window (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share);
 
@@ -48,13 +61,16 @@ public:
         tick_counter++;
     }
 
-    unsigned sync (double start_time, unsigned fps = 60) {
+    unsigned sync (unsigned fps = 60) {
+        static double start_time = 0;
         double frame_time = 1.0 / static_cast<double>(fps), now = glfwGetTime();
         if ((start_time + frame_time) > now) {
-            usleep((start_time + frame_time - glfwGetTime()) * 1000000.0);
-            return fps;
+            usleep((start_time + frame_time - now) * 1000000.0);
+        } else {
+            fps = static_cast<unsigned>(round(1.0 / (now - start_time)));
         }
-        return static_cast<unsigned>(round(1.0 / (now - start_time)));
+        start_time = glfwGetTime();
+        return fps;
     }
 
     unsigned setTimeout (const std::function<bool()> &func, double interval) {
