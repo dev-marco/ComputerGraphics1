@@ -1,11 +1,12 @@
 #include <memory>
 #include <iostream>
-#include <gl/glu.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "window.h"
 #include "object.h"
 #include "brick.h"
 #include "event.h"
+#include "shader.h"
 #include "shaders/cgwg_crt.h"
 
 int main (int argc, const char **argv) {
@@ -20,10 +21,10 @@ int main (int argc, const char **argv) {
     Window window = Window(720, 720, "Trabalho Pratico 1", NULL, NULL);
 
     BackgroundColor *rectbg = new BackgroundColor(Color::rgba(100, 0, 255, 0.5));
-    BackgroundColor *sphebg = new BackgroundColor(Color(0.0, 0.0, 0.0, 0.8));
-    Brick *rect = new Brick({-0.1, -0.04, 0.0}, 0.2, 0.08, rectbg);
-    Object *sphe = new Object({ 0.7,   0.7, 0.0}, true, new Sphere2D({0.0, 0.0, 0.0}, 0.3), sphebg);
-    Object *poly = new Object({-0.7,  -0.7, 0.0}, true, new Polygon2D({0.0, 0.0, 0.0}, 0.3, 5, Polygon2D::PI / -2), new BackgroundColor(Color::rgba(255, 255, 0, 0.4)));
+    BackgroundColor *sphebg = new BackgroundColor(Color::rgba(0, 0, 0, 0.8));
+    Brick *rect = new Brick({-0.1, -0.04, 4.0}, 0.2, 0.08, rectbg);
+    Object *sphe = new Object({ 0.7,   0.7, 4.0}, true, new Sphere2D({0.0, 0.0, 0.0}, 0.3), sphebg);
+    Object *poly = new Object({-0.7,  -0.7, 4.0}, true, new Polygon2D({0.0, 0.0, 0.0}, 0.3, 5, Polygon2D::PI / -2), new BackgroundColor(Color::rgba(255, 255, 0, 0.4)));
     window.addObject(rect);
     window.addObject(sphe);
     window.addObject(poly);
@@ -31,6 +32,8 @@ int main (int argc, const char **argv) {
     if (window) {
 
         window.makeCurrentContext();
+
+        glewInit();
 
         double last = glfwGetTime();
         window.setTimeout([ &window, &last ] () mutable {
@@ -57,6 +60,15 @@ int main (int argc, const char **argv) {
 
         glShadeModel(GL_SMOOTH);
 
+        std::vector<std::string> frag_shaders;
+        frag_shaders.push_back(Shaders::cgwg_CRT_fragment);
+
+        std::vector<std::string> vert_shaders;
+        vert_shaders.push_back(Shaders::cgwg_CRT_vertex);
+
+        Shader::Fragment shader_frag(frag_shaders);
+        Shader::Vertex shader_vert(vert_shaders);
+
         while (!window.shouldClose()) {
             int width, height;
 
@@ -72,8 +84,8 @@ int main (int argc, const char **argv) {
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             glTranslated(0.0, 0.0, -5.0);
-            glRotated(window.getTick() % 360, 0.0, 1.0, 0);
-            glRotated(window.getTick() % 360, 1.0, 0.0, 0);
+            // glRotated(window.getTick() % 360, 0.0, 1.0, 0);
+            // glRotated(window.getTick() % 360, 1.0, 0.0, 0);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -84,10 +96,13 @@ int main (int argc, const char **argv) {
                 if (Object::isValid(rect)) {
                     rect->destroy();
                 } else {
-                    rect = new Brick({-0.1, -0.04, 0.0}, 0.2, 0.08, new BackgroundColor(Color::rgba(100, 0, 255, 0.5)));
+                    rect = new Brick({-0.1, -0.04, 4.0}, 0.2, 0.08, new BackgroundColor(Color::rgba(100, 0, 255, 0.5)));
                     window.addObject(rect);
                 }
             }
+
+            shader_frag();
+            shader_vert();
 
             window.draw();
             window.update();
