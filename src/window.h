@@ -8,8 +8,6 @@
 #include "event.h"
 #include "object.h"
 
-#define M_PI 3.141592653589793238462643383279502884L
-
 class Window {
 
     GLFWwindow *window;
@@ -19,29 +17,17 @@ class Window {
 
 public:
 
-    static void perspective (double fovy, double aspect, double zNear, double zFar) {
-        double xmin, xmax, ymin, ymax;
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        ymax = zNear * tan(fovy * M_PI / 360.0);
-        ymin = -ymax;
-        xmin = ymin * aspect;
-        xmax = ymax * aspect;
-        glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
-    }
-
-    Window (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share);
-
-    void addObject (Object *obj) {
-        root.addChild(obj);
-    }
+    inline Window (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share) :
+        window(glfwCreateWindow(width, height, title, monitor, share)) {
+        glfwSetCursorPosCallback(this->window, Event::Event<Event::MouseMove>::trigger);
+    };
 
     void update () {
 
         double now = glfwGetTime();
         auto timeout = this->timeouts.begin(), timeout_end = this->timeouts.end();
 
-        root.update(now, tick_counter);
+        this->root.update(now, this->tick_counter);
 
         while (timeout != timeout_end) {
 
@@ -58,10 +44,14 @@ public:
             timeout = next;
         }
 
-        tick_counter++;
+        this->tick_counter++;
     }
 
-    unsigned sync (unsigned fps = 60) {
+    inline void addObject (Object *obj) {
+        this->root.addChild(obj);
+    }
+
+    inline unsigned sync (unsigned fps = 60) {
         static double start_time = 0;
         double frame_time = 1.0 / static_cast<double>(fps), now = glfwGetTime();
         if ((start_time + frame_time) > now) {
@@ -73,23 +63,23 @@ public:
         return fps;
     }
 
-    unsigned setTimeout (const std::function<bool()> &func, double interval) {
+    inline unsigned setTimeout (const std::function<bool()> &func, double interval) {
 
         double now = glfwGetTime();
 
-        unsigned id = timeout_counter;
-        timeout_counter++;
+        unsigned id = this->timeout_counter;
+        this->timeout_counter++;
 
         this->timeouts[id] = std::forward_as_tuple(func, now + interval, interval);
 
         return id;
     }
 
-    void clearTimeout (unsigned id) {
+    inline void clearTimeout (unsigned id) {
         this->timeouts.erase(id);
     }
 
-    unsigned animate (const std::function<bool(double)> &func, double total_time, unsigned steps = 0) {
+    inline unsigned animate (const std::function<bool(double)> &func, double total_time, unsigned steps = 0) {
 
         double delta;
 
@@ -106,37 +96,41 @@ public:
         }, total_time * delta);
     }
 
-    void draw () {
-        root.draw();
+    inline void draw () const {
+        this->root.draw();
     }
 
-    void makeCurrentContext () {
+    inline void makeCurrentContext () const {
         glfwMakeContextCurrent(this->window);
     }
 
-    bool shouldClose () {
+    inline bool shouldClose () const {
         return glfwWindowShouldClose(this->window);
     }
 
-    void swapBuffers () {
+    inline void swapBuffers () const {
         glfwSwapBuffers(this->window);
     }
 
-    void getFramebufferSize (int &width, int &height) {
+    inline void getFramebufferSize (int &width, int &height) const {
         glfwGetFramebufferSize(this->window, &width, &height);
     }
 
+    inline GLFWwindow *get () const {
+        return this->window;
+    }
+
+    inline operator bool () const {
+        return this->window;
+    }
+
+    inline unsigned getTick () const {
+        return this->tick_counter;
+    }
+
     template <typename EventType>
-    void event (typename EventType::FunctionType func, const std::string &id = "") {
+    inline void event (typename EventType::FunctionType func, const std::string &id = "") {
         Event::Event<EventType>::add(this->window, func, id);
-    }
-
-    GLFWwindow *get () {
-        return this->window;
-    }
-
-    operator bool () {
-        return this->window;
     }
 
 };
