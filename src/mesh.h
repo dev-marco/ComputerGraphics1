@@ -6,11 +6,9 @@
 #include <array>
 #include <memory>
 #include <iostream>
-#include <GLFW/glfw3.h>
 #include <cmath>
+#include <GLFW/glfw3.h>
 #include "background.h"
-
-#define M_PI 3.141592653589793238462643383279502884L
 
 class Mesh {
 
@@ -18,6 +16,8 @@ class Mesh {
     std::vector<std::shared_ptr<Mesh>> children;
 
 public:
+
+    static constexpr long double PI = 3.141592653589793238462643383279502884L;
 
     static std::valarray<double> closestPoint2D (
         std::valarray<double> ray_start,
@@ -138,7 +138,7 @@ public:
 
     void makeDraw (const std::valarray<double> &position, const Background *background, double ratio) const {
 
-        double step = (M_PI * 2.0) / static_cast<double>(this->sides);
+        double step = (Polygon2D::PI * 2.0) / static_cast<double>(this->sides);
         glBegin(GL_TRIANGLE_FAN);
 
         background->apply();
