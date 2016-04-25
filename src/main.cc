@@ -15,9 +15,6 @@ int main (int argc, const char **argv) {
         return -1;
     }
 
-    std::cout << Shaders::cgwg_CRT << std::endl;
-    return 0;
-
     // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     Window window = Window(720, 720, "Trabalho Pratico 1", NULL, NULL);
