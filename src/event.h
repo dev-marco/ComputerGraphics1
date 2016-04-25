@@ -12,7 +12,6 @@
 #include <functional>
 #include <algorithm>
 #include <iterator>
-#include <pthread.h>
 #include <GLFW/glfw3.h>
 
 namespace Event {
@@ -73,13 +72,14 @@ namespace Event {
             FunctionType ev;
             std::string id;
             unsigned counter;
-            auto func_data = EventType::trigger_list[window].begin(), func_end = EventType::trigger_list[window].end();
+            auto func_data = EventType::trigger_list[window].begin();
 
             // pthread_mutex_lock(&event_mutex);
             EventType::beforeEvents(window, args...);
 
-            while (func_data != func_end) {
+            while (func_data != EventType::trigger_list[window].end()) {
 
+                // FIXME may bug if triggerEvent remove next event!!! (maybe using queue would fix this)
                 std::tie(ev, id, counter) = *func_data;
                 auto func_erase = func_data++;
 
