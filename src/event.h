@@ -42,7 +42,7 @@ namespace Event {
 
     public:
 
-        static std::unordered_map<GLFWwindow *, std::list<std::tuple<std::function<void(GLFWwindow *, double, double, double, double)>, std::string, unsigned>>> trigger_list;
+        static std::unordered_map<GLFWwindow *, std::list<std::tuple<std::function<void(GLFWwindow *, double, double, double, double)>, std::string, unsigned, bool>>> trigger_list;
 
         static void beforeEvents (GLFWwindow *window, double x, double y) {
             int width, height;
@@ -73,24 +73,28 @@ namespace Event {
             std::string id;
             unsigned counter;
             auto func_data = EventType::trigger_list[window].begin();
+            bool marked;
 
             // pthread_mutex_lock(&event_mutex);
             EventType::beforeEvents(window, args...);
 
             while (func_data != EventType::trigger_list[window].end()) {
 
-                // FIXME may bug if triggerEvent remove next event!!! (maybe using queue would fix this)
-                std::tie(ev, id, counter) = *func_data;
+                std::tie(ev, id, counter, marked) = *func_data;
                 auto func_erase = func_data++;
 
-                EventType::triggerEvent(window, ev, args...);
-                if (counter != 0) {
-                    --counter;
-                    if (counter == 0) {
-                        EventType::trigger_list[window].erase(func_erase);
-                    } else {
-                        std::get<2>(*func_erase) = counter;
+                if (!marked) {
+                    EventType::triggerEvent(window, ev, args...);
+                    if (counter != 0) {
+                        --counter;
+                        if (counter == 0) {
+                            EventType::trigger_list[window].erase(func_erase);
+                        } else {
+                            std::get<2>(*func_erase) = counter;
+                        }
                     }
+                } else {
+                    EventType::trigger_list[window].erase(func_erase);
                 }
             }
 
@@ -99,7 +103,7 @@ namespace Event {
         }
 
         static void add (GLFWwindow *window, const FunctionType &func, const std::string &id = "", unsigned limit = 0) {
-            EventType::trigger_list[window].push_back(std::forward_as_tuple(func, id, limit));
+            EventType::trigger_list[window].push_back(std::forward_as_tuple(func, id, limit, false));
         }
 
         static void add (GLFWwindow *window, const FunctionType &func, unsigned limit = 0) {
@@ -107,16 +111,20 @@ namespace Event {
         }
 
         static void erase (GLFWwindow *window, const FunctionType &func) {
-            EventType::trigger_list[window].remove_if([ func ] (std::tuple<FunctionType, std::string, unsigned> val) {
-                return func == std::get<0>(val);
-            });
+            for (const auto &ev : EventType::trigger_list[window]) {
+                if (std::get<0>(ev) == func) {
+                    std::get<3>(ev) = true;
+                }
+            }
         }
 
         static void erase (GLFWwindow *window, const std::string &id) {
             if (id != "") {
-                EventType::trigger_list[window].remove_if([ id ] (std::tuple<FunctionType, std::string, unsigned> val) {
-                    return id == std::get<1>(val);
-                });
+                for (const auto &ev : EventType::trigger_list[window]) {
+                    if (std::get<1>(ev) == id) {
+                        std::get<3>(ev) = true;
+                    }
+                }
             }
         }
 
