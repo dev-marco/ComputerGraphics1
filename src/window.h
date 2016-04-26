@@ -4,7 +4,9 @@
 #include <functional>
 #include <map>
 #include <unistd.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "shader.h"
 #include "event.h"
 #include "object.h"
 
@@ -13,7 +15,16 @@ class Window {
     GLFWwindow *window;
     Object root;
     std::map<unsigned, std::tuple<std::function<bool()>, double, double>> timeouts;
-    unsigned tick_counter = 0, timeout_counter = 0;
+    unsigned tick_counter = 0;
+
+    inline bool executeTimeout (std::map<unsigned, std::tuple<std::function<bool()>, double, double>>::iterator timeout) {
+        if (std::get<0>(timeout->second)()) {
+            std::get<1>(timeout->second) += std::get<2>(timeout->second);
+            return true;
+        }
+        this->timeouts.erase(timeout);
+        return false;
+    }
 
 public:
 
@@ -25,20 +36,16 @@ public:
     void update () {
 
         double now = glfwGetTime();
-        auto timeout = this->timeouts.begin(), timeout_end = this->timeouts.end();
+        auto timeout = this->timeouts.begin();
 
         this->root.update(now, this->tick_counter);
 
-        while (timeout != timeout_end) {
+        while (timeout != this->timeouts.end()) {
 
             auto next = std::next(timeout, 1);
 
             if (std::get<1>(timeout->second) <= now) {
-                if (!(std::get<0>(timeout->second)())) {
-                    this->timeouts.erase(timeout);
-                } else {
-                    std::get<1>(timeout->second) += std::get<2>(timeout->second);
-                }
+                this->executeTimeout(timeout);
             }
 
             timeout = next;
@@ -65,10 +72,12 @@ public:
 
     inline unsigned setTimeout (const std::function<bool()> &func, double interval) {
 
+        static unsigned timeout_counter = 0;
+
         double now = glfwGetTime();
 
-        unsigned id = this->timeout_counter;
-        this->timeout_counter++;
+        unsigned id = timeout_counter;
+        timeout_counter++;
 
         this->timeouts[id] = std::forward_as_tuple(func, now + interval, interval);
 
@@ -77,6 +86,14 @@ public:
 
     inline void clearTimeout (unsigned id) {
         this->timeouts.erase(id);
+    }
+
+    inline bool executeTimeout (unsigned id) {
+        auto timeout = this->timeouts.find(id);
+        if (timeout != this->timeouts.end()) {
+            return this->executeTimeout(timeout);
+        }
+        return false;
     }
 
     inline unsigned animate (const std::function<bool(double)> &func, double total_time, unsigned steps = 0) {
@@ -96,7 +113,19 @@ public:
         }, total_time * delta);
     }
 
+    inline void completeAnimation (unsigned id) {
+        auto timeout = this->timeouts.find(id);
+        if (timeout != this->timeouts.end()) {
+            while(this->executeTimeout(timeout));
+        }
+    }
+
+    inline void setShader (const Shader::Program *shader) {
+        this->root.setShader(shader);
+    }
+
     inline void draw () const {
+        this->root.getShader()->use();
         this->root.draw();
     }
 
