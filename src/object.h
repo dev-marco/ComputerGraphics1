@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <iostream>
 #include <valarray>
+#include "shader.h"
 #include "background.h"
 #include "mesh.h"
 
@@ -16,11 +17,12 @@ class Object {
     static std::stack<Object *> marked;
 
     bool display;
-    Mesh *mesh, *collider = NULL;
+    Mesh *mesh, *collider = nullptr;
     Background *background;
     std::unordered_set<Object *> children;
-    Object *parent = NULL;
+    Object *parent = nullptr;
     std::valarray<double> position, speed, acceleration;
+    const Shader::Program *shader = nullptr;
 
     static void delayedDestroy () {
 
@@ -165,11 +167,15 @@ public:
 
                 this->beforeDraw();
 
+                // Shader::push(this->shader);
+
                 this->mesh->draw(this->position, this->background, ratio);
 
                 for (const auto &child : this->children) {
                     child->draw(ratio);
                 }
+
+                // Shader::pop();
 
                 this->afterDraw();
             }
@@ -178,14 +184,15 @@ public:
         }
     }
 
-    void destroy () {
-        this->display = false;
-        Object::marked.push(this);
+    inline const Shader::Program *getShader (void) const {
+        return this->shader;
     }
 
-    inline operator bool () const {
-        return Object::isValid(this);
-    }
+    void destroy () { this->display = false, Object::marked.push(this); }
+
+    inline void setShader (const Shader::Program *program) { this->shader = program; }
+
+    inline operator bool () const { return Object::isValid(this); }
 
     virtual void onCollision (const Object *other) {}
     virtual void beforeDestroy () {}
