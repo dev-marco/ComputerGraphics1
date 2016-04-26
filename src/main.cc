@@ -60,14 +60,19 @@ int main (int argc, const char **argv) {
 
         glShadeModel(GL_SMOOTH);
 
-        std::vector<std::string> frag_shaders;
-        frag_shaders.push_back(Shaders::cgwg_CRT_fragment);
+        Shader::Program shader_program;
 
-        std::vector<std::string> vert_shaders;
-        vert_shaders.push_back(Shaders::cgwg_CRT_vertex);
+        shader_program.attachVertexShader({ Shader::cgwg_CRT_vertex });
+        shader_program.attachFragmentShader({ Shader::cgwg_CRT_fragment });
 
-        Shader::Fragment shader_frag(frag_shaders);
-        Shader::Vertex shader_vert(vert_shaders);
+        shader_program.link();
+
+        // shader_program.onUse([] (const shader_program *this) {
+        //     GLint loc = this->getUniformLocationARB("time");
+        //     glUniform1fARB(loc, glfwGetTime());
+        // });
+
+        window.setShader(&shader_program);
 
         while (!window.shouldClose()) {
             int width, height;
@@ -84,25 +89,10 @@ int main (int argc, const char **argv) {
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             glTranslated(0.0, 0.0, -5.0);
-            // glRotated(window.getTick() % 360, 0.0, 1.0, 0);
-            // glRotated(window.getTick() % 360, 1.0, 0.0, 0);
+            // glRotated(window.getTick() % 360, 0.0, 1.0, 0.0);
+            // glRotated(window.getTick() % 360, 1.0, 0.0, 0.0);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            static int t_last = 0;
-            int t = glfwGetTime() * 10;
-            if (t != t_last) {
-                t_last = t;
-                if (Object::isValid(rect)) {
-                    rect->destroy();
-                } else {
-                    rect = new Brick({-0.1, -0.04, 4.0}, 0.2, 0.08, new BackgroundColor(Color::rgba(100, 0, 255, 0.5)));
-                    window.addObject(rect);
-                }
-            }
-
-            shader_frag();
-            shader_vert();
 
             window.draw();
             window.update();
