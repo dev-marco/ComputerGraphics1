@@ -3,13 +3,13 @@
 CXX = c++
 CXXFLAGS = -std=c++11 -g -Wall -O3 -Wno-missing-braces
 CXXLIBS = -lglfw3
-SRC := main.cc object.cc mesh.cc background.cc event.cc color.cc window.cc brick.cc
+SRC := main.cc object.cc mesh.cc background.cc event.cc color.cc window.cc brick.cc shader.cc
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
 
 ifeq ($(OS), Windows_NT)
-CXXLIBS += -lglu32 -lopengl32 -lgdi32 -static-libstdc++ -static-libgcc
+CXXLIBS += -lopengl32 -lglew32 -lglu32 -lgdi32 -static-libstdc++ -static-libgcc
 else
 CXXLIBS += -lGL -lGLEW -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
 endif
