@@ -6,14 +6,17 @@
 #include <sstream>
 #include <memory>
 #include <unordered_map>
+#include "window.h"
 #include "brick.h"
 
 namespace Breakout {
 
     class Stage {
 
-        std::unordered_set<std::shared_ptr<Brick *>> destructable, indestructable;
+        const Window *window;
+        std::unordered_set<std::shared_ptr<Brick *>> can_destroy, cannot_destroy;
         double max_speed = 0.01;
+        unsigned brick_lines;
 
         static inline bool not_space (int c) {
         	return !isspace(c);
@@ -44,18 +47,66 @@ namespace Breakout {
         	return line;
         }
 
+        static Brick *createBrickByID (const Window *window, unsigned id) {
+
+            Brick *brick = nullptr;
+
+            switch (id) {
+
+            }
+
+            return brick;
+        }
+
     public:
 
-        Stage (const std::string &file) {
+        static constexpr double DefaultVerticalSpace = 0.005, DefaultHorizontalSpace = 0.005;
+
+        Stage (const Window *_window, const std::string &file) : window(_window) {
 
             std::ifstream input(file, std::ios::in);
-            std::string fragment;
+            std::string block;
             std::stringstream ss(Stage::nextLine(input));
+            double x, y = 0.0;
 
             ss >> this->max_speed;
 
-            
+            ss.str(Stage::nextLine(input));
 
+            ss.seekg(0) >> this->brick_lines;
+
+            for (unsigned i = 0; i < this->brick_lines; ++i) {
+
+                x = 0.0;
+
+                ss.str(Stage::nextLine(input));
+                ss.seekg(0);
+
+                while (ss.good()) {
+
+                    ss >> block;
+
+                    if (block[0] != '-') {
+                        this->addBrick(std::stoul(block), x, y);
+                    }
+                    x += Brick::DefaultWidth + Stage::DefaultHorizontalSpace;
+                }
+                y += Brick::DefaultHeight + Stage::DefaultVerticalSpace;
+            }
+
+        }
+
+        void addBrick (unsigned id, double x, double y) {
+
+            Brick *brick = Stage::createBrickByID(this->window, id);
+
+            if (brick) {
+                if (brick->isDestructible()) {
+                    this->can_destroy.emplace(brick);
+                } else {
+                    this->cannot_destroy.emplace(brick);
+                }
+            }
         }
 
     };
