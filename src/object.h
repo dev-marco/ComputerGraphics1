@@ -188,9 +188,11 @@ public:
         return this->shader;
     }
 
-    void destroy () { this->display = false, Object::marked.push(this); }
+    void destroy (void) { this->display = false, Object::marked.push(this); }
 
     inline void setShader (const Shader::Program *program) { this->shader = program; }
+
+    inline const Mesh *getMesh (void) const { return this->mesh; }
 
     inline operator bool () const { return Object::isValid(this); }
 
