@@ -3,7 +3,7 @@
 namespace Shader {
 
 	const std::string cgwg_CRT_fragment = R"_cgwg_CRT_frag(
-		#version 130
+		#version 120
 
 		void main (void) {
 			gl_FragColor = gl_Color;
@@ -11,7 +11,7 @@ namespace Shader {
 	)_cgwg_CRT_frag";
 
 	const std::string cgwg_CRT_vertex = R"_cgwg_CRT_vert(
-		#version 130
+		#version 120
 
 		uniform float time;
 
