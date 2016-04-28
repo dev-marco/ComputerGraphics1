@@ -7,12 +7,12 @@
 #include <set>
 #include <map>
 #include <iostream>
+#include <functional>
 #include <GL/glew.h>
 
 namespace Shader {
 
     static const class Program *current_shader = nullptr;
-    static std::stack<const class Program *> shader_stack;
 
     class Program {
 
@@ -26,6 +26,7 @@ namespace Shader {
             std::make_pair(GL_TESS_EVALUATION_SHADER, std::set<GLuint>())
         };
         bool linked = false, multiple = false;
+        std::function<void(const Shader::Program *)> before_use, after_use;
 
         static GLuint compile (GLuint type, const std::vector<std::string> &src) {
             unsigned size = src.size();
@@ -129,15 +130,29 @@ namespace Shader {
         inline bool use (void) const {
             if (*this) {
                 Shader::current_shader = this;
+                if (this->before_use) {
+                    this->before_use(this);
+                }
                 glUseProgram(this->prog);
+                if (this->after_use) {
+                    this->after_use(this);
+                }
                 return true;
             }
             return false;
         }
 
+        inline void onBeforeUse (const std::function<void(const Shader::Program *)> &func) {
+            this->before_use = func;
+        }
+
+        inline void onAfterUse (const std::function<void(const Shader::Program *)> &func) {
+            this->after_use = func;
+        }
+
         inline GLuint getProgramID (void) const { return this->prog; }
 
-        GLint getUniformLocationARB (const std::string &name) {
+        GLint getUniformLocationARB (const std::string &name) const {
             return glGetUniformLocationARB(this->prog, name.c_str());
         }
 
@@ -151,10 +166,6 @@ namespace Shader {
 
         inline operator bool () const { return this->shaders.at(GL_VERTEX_SHADER).size() && this->shaders.at(GL_FRAGMENT_SHADER).size(); }
     };
-
-    void push(const Program *);
-    void pop(void);
-    void resetShaders(void);
 }
 
 #endif

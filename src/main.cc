@@ -4,9 +4,9 @@
 #include <GLFW/glfw3.h>
 #include "window.h"
 #include "object.h"
-#include "brick.h"
 #include "event.h"
 #include "shader.h"
+#include "breakout/brick.h"
 #include "shaders/cgwg_crt.h"
 
 int main (int argc, const char **argv) {
@@ -22,7 +22,7 @@ int main (int argc, const char **argv) {
 
     BackgroundColor *rectbg = new BackgroundColor(Color::rgba(100, 0, 255, 0.5));
     BackgroundColor *sphebg = new BackgroundColor(Color::rgba(0, 0, 0, 0.8));
-    Brick *rect = new Brick({-0.1, -0.04, 4.0}, 0.2, 0.08, rectbg);
+    Breakout::Brick *rect = new Breakout::Brick(window, {-0.1, -0.04, 4.0}, rectbg);
     Object *sphe = new Object({ 0.7,   0.7, 4.0}, true, new Sphere2D({0.0, 0.0, 0.0}, 0.3), sphebg);
     Object *poly = new Object({-0.7,  -0.7, 4.0}, true, new Polygon2D({0.0, 0.0, 0.0}, 0.3, 5, Polygon2D::PI / -2), new BackgroundColor(Color::rgba(255, 255, 0, 0.4)));
     window.addObject(rect);
@@ -46,7 +46,7 @@ int main (int argc, const char **argv) {
         window.animate([&sphebg] (double progress) -> bool {
             sphebg->setColor(Color::rgba(progress * 100, progress * 0, progress * 255, 1.0));
             return true;
-        }, 10);
+        }, 5, 0, Window::Easing::Exponential);
 
         window.event<Event::MouseMove>([](GLFWwindow *window, double x, double y, double posx, double posy) {
 
@@ -62,15 +62,20 @@ int main (int argc, const char **argv) {
 
         Shader::Program shader_program;
 
-        shader_program.attachVertexShader({ Shader::cgwg_CRT_vertex });
-        shader_program.attachFragmentShader({ Shader::cgwg_CRT_fragment });
+        try {
+            shader_program.attachVertexShader({ Shader::cgwg_CRT_vertex });
+            shader_program.attachFragmentShader({ Shader::cgwg_CRT_fragment });
+        } catch (std::string err) {
+            std::cout << err << std::endl;
+            return -1;
+        }
 
         shader_program.link();
 
-        // shader_program.onUse([] (const shader_program *this) {
-        //     GLint loc = this->getUniformLocationARB("time");
-        //     glUniform1fARB(loc, glfwGetTime());
-        // });
+        shader_program.onAfterUse([] (const Shader::Program *program) {
+            GLint loc = program->getUniformLocationARB("time");
+            glUniform1fARB(loc, glfwGetTime());
+        });
 
         window.setShader(&shader_program);
 
