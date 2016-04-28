@@ -6,15 +6,15 @@
 #include <sstream>
 #include <memory>
 #include <unordered_map>
-#include "window.h"
 #include "brick.h"
+#include "../window.h"
 
 namespace Breakout {
 
     class Stage {
 
-        const Window *window;
-        std::unordered_set<std::shared_ptr<Brick *>> can_destroy, cannot_destroy;
+        Window &window;
+        std::unordered_set<std::shared_ptr<Brick>> can_destroy, cannot_destroy;
         double max_speed = 0.01;
         unsigned brick_lines;
 
@@ -47,7 +47,7 @@ namespace Breakout {
         	return line;
         }
 
-        static Brick *createBrickByID (const Window *window, unsigned id) {
+        static Brick *createBrickByID (Window &window, unsigned id) {
 
             Brick *brick = nullptr;
 
@@ -62,7 +62,7 @@ namespace Breakout {
 
         static constexpr double DefaultVerticalSpace = 0.005, DefaultHorizontalSpace = 0.005;
 
-        Stage (const Window *_window, const std::string &file) : window(_window) {
+        Stage (Window &_window, const std::string &file) : window(_window) {
 
             std::ifstream input(file, std::ios::in);
             std::string block;
@@ -108,6 +108,8 @@ namespace Breakout {
                 }
             }
         }
+
+        inline Window &getWindow (void) const { return this->window; }
 
     };
 

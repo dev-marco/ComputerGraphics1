@@ -14,7 +14,7 @@ namespace Breakout {
 
     class Brick : public Object {
 
-        const Window *window;
+        Window &window;
         double width, height;
         unsigned lives;
 
@@ -23,7 +23,7 @@ namespace Breakout {
         static constexpr double DefaultWidth = 0.2, DefaultHeight = 0.08;
 
         Brick (
-            const Window *_window,
+            Window &_window,
             const std::array<double, 3> &_position,
             Background *_background,
             double _width = Brick::DefaultWidth,
@@ -50,8 +50,9 @@ namespace Breakout {
                     this->destroy();
                 }
             }
-
         }
+
+        inline Window &getWindow (void) const { return this->window; }
 
     };
 
@@ -60,7 +61,7 @@ namespace Breakout {
     public:
 
         BonusBrick (
-            const Window *_window,
+            Window &_window,
             const std::array<double, 3> &_position,
             Background *_background,
             double _width = Brick::DefaultWidth,
@@ -81,7 +82,7 @@ namespace Breakout {
 
     class TransitionBrick : public Brick {
 
-        
+
 
     };
 
