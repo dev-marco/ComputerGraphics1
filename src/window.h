@@ -28,6 +28,22 @@ class Window {
 
 public:
 
+    struct Easing {
+
+        static inline double Linear (double progress) {
+            return progress;
+        }
+
+        static inline double Logarithmic (double progress) {
+            return log2(((progress * 31) + 1)) / log2(32);
+        }
+
+        static inline double Exponential (double progress) {
+            return exp((progress - 1) * 8) * progress;
+        }
+
+    };
+
     inline Window (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share) :
         window(glfwCreateWindow(width, height, title, monitor, share)) {
         glfwSetCursorPosCallback(this->window, Event::Event<Event::MouseMove>::trigger);
@@ -96,7 +112,12 @@ public:
         return false;
     }
 
-    inline unsigned animate (const std::function<bool(double)> &func, double total_time, unsigned steps = 0) {
+    inline unsigned animate (
+        const std::function<bool(double)> &func,
+        double total_time,
+        unsigned steps = 0,
+        std::function<double(double)> easing = Easing::Linear
+    ) {
 
         double delta;
 
@@ -106,10 +127,10 @@ public:
 
         delta = 1.0 / static_cast<double>(steps);
 
-        return this->setTimeout ([ delta, func ] () -> bool {
+        return this->setTimeout ([ delta, func, easing ] () -> bool {
             static double progress = 0.0;
             progress = std::min(1.0, progress + delta);
-            return func(progress) && progress < 1.0;
+            return func(easing(progress)) && progress < 1.0;
         }, total_time * delta);
     }
 
