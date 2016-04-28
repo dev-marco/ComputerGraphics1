@@ -3,7 +3,8 @@
 CXX = c++
 CXXFLAGS = -std=c++11 -g -Wall -O3 -Wno-missing-braces
 CXXLIBS = -lglfw3
-SRC := main.cc object.cc mesh.cc background.cc event.cc color.cc window.cc brick.cc shader.cc
+SRC := main.cc object.cc mesh.cc background.cc event.cc color.cc window.cc shader.cc\
+ breakout/brick.cc breakout/game.cc breakout/stage.cc
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
