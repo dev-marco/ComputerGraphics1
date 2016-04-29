@@ -66,10 +66,11 @@ public:
         const std::array<double, 3> &_position = {0.0, 0.0, 0.0},
         bool _display = true,
         Mesh *_mesh = new Mesh(),
+        Mesh *_collider = nullptr,
         Background *_background = new Background(),
         const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
         const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0}
-    ) : display(_display), mesh(_mesh), background(_background), position(_position.data(), 3), speed(_speed.data(), 3), acceleration(_acceleration.data(), 3) {
+    ) : display(_display), mesh(_mesh), collider(_collider), background(_background), position(_position.data(), 3), speed(_speed.data(), 3), acceleration(_acceleration.data(), 3) {
         Object::invalid.erase(this);
     };
 
@@ -95,11 +96,11 @@ public:
     }
 
     bool detectCollision (const Object *other) const {
-        return false;
+        return this->getCollider()->detectCollision(other->getCollider(), this->getPosition(), other->getPosition());
     }
 
     bool collides () {
-        return this->collider != NULL;
+        return this->collider != nullptr;
     }
 
     inline void addChild (Object *obj) {
@@ -111,7 +112,7 @@ public:
 
     inline void removeChild (Object *obj) {
         if (Object::isValid(this) && Object::isValid(obj)) {
-            obj->parent = NULL;
+            obj->parent = nullptr;
             this->children.erase(obj);
         }
     }
@@ -132,7 +133,7 @@ public:
         return this->children;
     }
 
-    void update (double now, unsigned tick) {
+    virtual void update (double now, unsigned tick) {
 
         static bool destroy_shared = true;
         bool destroy_local = destroy_shared;
@@ -161,7 +162,7 @@ public:
         }
     }
 
-    void draw (double ratio = 1.0) const {
+    virtual void draw (double ratio = 1.0) const {
         if (Object::isValid(this)) {
             if (this->display) {
 
@@ -192,7 +193,16 @@ public:
 
     inline void setShader (const Shader::Program *program) { this->shader = program; }
 
+    inline std::valarray<double> getPosition (void) const { return this->position; }
+    inline std::valarray<double> getSpeed (void) const { return this->speed; }
+    inline std::valarray<double> getAcceleration (void) const { return this->acceleration; }
+
+    inline void setPosition (const std::valarray<double> &_position) { this->position = _position; }
+    inline void setSpeed (const std::valarray<double> &_speed) { this->speed = _speed; }
+    inline void setAcceleration (const std::valarray<double> &_acceleration) { this->acceleration = _acceleration; }
+
     inline const Mesh *getMesh (void) const { return this->mesh; }
+    inline const Mesh *getCollider (void) const { return this->collider; }
 
     inline operator bool () const { return Object::isValid(this); }
 
