@@ -7,9 +7,16 @@
 #include "event.h"
 #include "shader.h"
 #include "breakout/brick.h"
+#include "breakout/stage.h"
 #include "shaders/cgwg_crt.h"
 
 int main (int argc, const char **argv) {
+
+    if (argc < 2) {
+        std::cerr << "You should pass the name of the stage via terminal." << std::endl;
+        std::cerr << "Example: $ bin/tp1 ../stages/level_00.brk" << std::endl;
+        return -1;
+    }
 
     if (!glfwInit()) {
         std::cerr << "ERROR: Could not initialize GLFW" << std::endl;
@@ -20,37 +27,13 @@ int main (int argc, const char **argv) {
 
     Window window = Window(720, 720, "Trabalho Pratico 1", NULL, NULL);
 
-    BackgroundColor *rectbg = new BackgroundColor(Color::rgba(100, 0, 255, 0.5));
-    BackgroundColor *sphebg = new BackgroundColor(Color::rgba(0, 0, 0, 0.8));
-    Breakout::Brick *rect = new Breakout::Brick(window, {-0.1, -0.04, 4.0}, rectbg);
-    Object *sphe = new Object({ 0.7,   0.7, 4.0}, true, new Sphere2D({0.0, 0.0, 0.0}, 0.3), sphebg);
-    Object *poly = new Object({-0.7,  -0.7, 4.0}, true, new Polygon2D({0.0, 0.0, 0.0}, 0.3, 5, Polygon2D::PI / -2), new BackgroundColor(Color::rgba(255, 255, 0, 0.4)));
-    window.addObject(rect);
-    window.addObject(sphe);
-    window.addObject(poly);
-
     if (window) {
 
         window.makeCurrentContext();
 
         glewInit();
 
-        double last = glfwGetTime();
-        window.setTimeout([ &window, &last ] () mutable {
-            double now = glfwGetTime();
-            std::cout << (now - last) << " seconds" << std::endl;
-            last = now;
-            return true;
-        }, 1.5);
-
-        window.animate([&sphebg] (double progress) -> bool {
-            sphebg->setColor(Color::rgba(progress * 100, progress * 0, progress * 255, 1.0));
-            return true;
-        }, 5, 0, Window::Easing::Exponential);
-
-        window.event<Event::MouseMove>([](GLFWwindow *window, double x, double y, double posx, double posy) {
-
-        }, "mousemove.paddler");
+        Breakout::Stage stage(window, argv[1]);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
