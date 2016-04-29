@@ -6,7 +6,10 @@
 #include <sstream>
 #include <memory>
 #include <unordered_map>
+#include <random>
+#include <chrono>
 #include "brick.h"
+#include "ball.h"
 #include "../window.h"
 
 namespace Breakout {
@@ -14,9 +17,7 @@ namespace Breakout {
     class Stage {
 
         Window &window;
-        std::unordered_set<std::shared_ptr<Brick>> can_destroy, cannot_destroy;
-        double max_speed = 0.01;
-        unsigned brick_lines;
+        std::unordered_set<Brick *> can_destroy, cannot_destroy;
 
         static inline bool not_space (int c) {
         	return !isspace(c);
@@ -37,22 +38,33 @@ namespace Breakout {
         }
 
         static std::string nextLine (
-        	std::istream &in
+        	std::istream &in,
+            bool &ok
         ) {
-        	std::string line;
+        	std::string line = "";
         	do {
         		std::getline(in, line);
         		line = line.substr(0, line.find_first_of('#'));
-        	} while (!trim(line).size());
+        	} while (!trim(line).size() && in.good());
+
+            ok = line.size() > 0;
+
         	return line;
         }
 
-        static Brick *createBrickByID (Window &window, unsigned id) {
+        static Brick *createBrickByID (Window &window, unsigned id, double x, double y) {
 
             Brick *brick = nullptr;
+            std::default_random_engine gen(glfwGetTime() * 1000000);
+            std::uniform_int_distribution<int> color(0, 255);
+            std::uniform_real_distribution<double> alpha(0.3, 1.0);
 
             switch (id) {
-
+                case 1: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 0, 0, 1.0))); break;
+                case 2: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(0, 255, 0, 1.0))); break;
+                case 3: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(0, 0, 255, 1.0))); break;
+                case 4: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 255, 0, 1.0))); break;
+                case 5: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 255, 255, 1.0))); break;
             }
 
             return brick;
@@ -60,26 +72,23 @@ namespace Breakout {
 
     public:
 
-        static constexpr double DefaultVerticalSpace = 0.005, DefaultHorizontalSpace = 0.005;
+        static constexpr double DefaultVerticalSpace = 0.01, DefaultHorizontalSpace = 0.01;
 
         Stage (Window &_window, const std::string &file) : window(_window) {
 
+            bool ok;
             std::ifstream input(file, std::ios::in);
             std::string block;
-            std::stringstream ss(Stage::nextLine(input));
-            double x, y = 0.0;
+            std::stringstream ss(Stage::nextLine(input, ok));
+            double max_speed, x, y = 1.0 - (Stage::DefaultVerticalSpace / 2.0) - Brick::DefaultHeight;
 
-            ss >> this->max_speed;
+            ss >> max_speed;
 
-            ss.str(Stage::nextLine(input));
+            for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
 
-            ss.seekg(0) >> this->brick_lines;
+                x = -1.0 + (Stage::DefaultHorizontalSpace / 2.0);
 
-            for (unsigned i = 0; i < this->brick_lines; ++i) {
-
-                x = 0.0;
-
-                ss.str(Stage::nextLine(input));
+                ss.str(line);
                 ss.seekg(0);
 
                 while (ss.good()) {
@@ -91,21 +100,23 @@ namespace Breakout {
                     }
                     x += Brick::DefaultWidth + Stage::DefaultHorizontalSpace;
                 }
-                y += Brick::DefaultHeight + Stage::DefaultVerticalSpace;
+                y -= Brick::DefaultHeight + Stage::DefaultVerticalSpace;
             }
 
+            window.addObject(new Ball(max_speed));
         }
 
         void addBrick (unsigned id, double x, double y) {
 
-            Brick *brick = Stage::createBrickByID(this->window, id);
+            Brick *brick = Stage::createBrickByID(this->window, id, x, y);
 
             if (brick) {
                 if (brick->isDestructible()) {
-                    this->can_destroy.emplace(brick);
+                    this->can_destroy.insert(brick);
                 } else {
-                    this->cannot_destroy.emplace(brick);
+                    this->cannot_destroy.insert(brick);
                 }
+                this->window.addObject(brick);
             }
         }
 
