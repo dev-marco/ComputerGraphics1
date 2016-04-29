@@ -2,13 +2,13 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "window.h"
-#include "object.h"
-#include "event.h"
-#include "shader.h"
+#include "engine/window.h"
+#include "engine/object.h"
+#include "engine/event.h"
+#include "engine/shader.h"
+#include "engine/shaders/cgwg_crt.h"
 #include "breakout/brick.h"
 #include "breakout/stage.h"
-#include "shaders/cgwg_crt.h"
 
 int main (int argc, const char **argv) {
 

@@ -10,7 +10,7 @@
 #include <chrono>
 #include "brick.h"
 #include "ball.h"
-#include "../window.h"
+#include "../engine/window.h"
 
 namespace Breakout {
 
@@ -59,7 +59,7 @@ namespace Breakout {
             std::uniform_int_distribution<int> color(0, 255);
             std::uniform_real_distribution<double> alpha(0.3, 1.0);
 
-            switch (id) {
+            switch (id % 10) {
                 case 1: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 0, 0, 1.0))); break;
                 case 2: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(0, 255, 0, 1.0))); break;
                 case 3: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(0, 0, 255, 1.0))); break;

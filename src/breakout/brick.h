@@ -6,9 +6,9 @@
 #include <valarray>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "../mesh.h"
-#include "../object.h"
-#include "../window.h"
+#include "../engine/mesh.h"
+#include "../engine/object.h"
+#include "../engine/window.h"
 
 namespace Breakout {
 

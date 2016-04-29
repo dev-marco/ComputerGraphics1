@@ -3,7 +3,8 @@
 CXX = c++
 CXXFLAGS = -std=c++11 -g -Wall -O3 -Wno-missing-braces
 CXXLIBS = -lglfw3
-SRC := main.cc object.cc mesh.cc background.cc event.cc color.cc window.cc shader.cc\
+SRC := main.cc\
+ engine/object.cc engine/mesh.cc engine/background.cc engine/event.cc engine/color.cc engine/window.cc engine/shader.cc\
  breakout/brick.cc breakout/game.cc breakout/stage.cc breakout/ball.cc
 STAGES := stages/level_00.brk
 OBJ := $(SRC:%.cc=build/%.o)

@@ -2,7 +2,7 @@
 #define SRC_BREAKOUT_BALL_H_
 
 #include <valarray>
-#include "../object.h"
+#include "../engine/object.h"
 
 class Ball : public Object {
 
