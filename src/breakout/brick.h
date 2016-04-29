@@ -20,7 +20,7 @@ namespace Breakout {
 
     public:
 
-        static constexpr double DefaultWidth = 0.2, DefaultHeight = 0.08;
+        static constexpr double DefaultWidth = 0.19, DefaultHeight = 0.05;
 
         Brick (
             Window &_window,
@@ -31,7 +31,7 @@ namespace Breakout {
             const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
             const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0},
             unsigned _lives = 1
-        ) : Object(_position, true, new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration), window(_window), width(_width), height(_height), lives(_lives) {}
+        ) : Object(_position, true, new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration), window(_window), width(_width), height(_height), lives(_lives) {}
 
         std::string getType (void) const { return "breakout_brick"; }
 
