@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "event.h"
 #include "object.h"
+#include "easing.h"
 
 class Window {
 
@@ -28,22 +29,6 @@ class Window {
 
 public:
 
-    struct Easing {
-
-        static inline double Linear (double progress) {
-            return progress;
-        }
-
-        static inline double Logarithmic (double progress) {
-            return log2(((progress * 31) + 1)) / log2(32);
-        }
-
-        static inline double Exponential (double progress) {
-            return exp((progress - 1) * 8) * progress;
-        }
-
-    };
-
     inline Window (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share) :
         window(glfwCreateWindow(width, height, title, monitor, share)) {
         glfwSetCursorPosCallback(this->window, Event::Event<Event::MouseMove>::trigger);
@@ -54,6 +39,7 @@ public:
         double now = glfwGetTime();
         auto timeout = this->timeouts.begin();
 
+        this->root.detectCollisions();
         this->root.update(now, this->tick_counter);
 
         while (timeout != this->timeouts.end()) {
@@ -115,22 +101,25 @@ public:
     inline unsigned animate (
         const std::function<bool(double)> &func,
         double total_time,
-        unsigned steps = 0,
-        std::function<double(double)> easing = Easing::Linear
+        unsigned total_steps = 0,
+        std::function<double(double, double, double, double)> easing = Easing::Linear
     ) {
 
-        double delta;
+        double delta, start_time = glfwGetTime();
 
-        if (steps == 0) {
-            steps = ceil(total_time / 0.01);
+        if (total_steps == 0) {
+            total_steps = ceil(total_time / 0.01);
         }
 
-        delta = 1.0 / static_cast<double>(steps);
+        delta = 1.0 / static_cast<double>(total_steps);
 
-        return this->setTimeout ([ delta, func, easing ] () -> bool {
-            static double progress = 0.0;
-            progress = std::min(1.0, progress + delta);
-            return func(easing(progress)) && progress < 1.0;
+        return this->setTimeout ([ delta, func, easing, start_time, total_time ] () -> bool {
+            double now = glfwGetTime();
+            if (now < (total_time + start_time)) {
+                return func(easing(now - start_time, 0.0, 1.0, total_time));
+            }
+            func(1.0);
+            return false;
         }, total_time * delta);
     }
 
@@ -146,7 +135,10 @@ public:
     }
 
     inline void draw () const {
-        this->root.getShader()->use();
+        const Shader::Program *shader = this->root.getShader();
+        if (shader != nullptr) {
+            this->root.getShader()->use();
+        }
         this->root.draw();
     }
 
