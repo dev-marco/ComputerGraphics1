@@ -60,7 +60,7 @@ int main (int argc, const char **argv) {
             glUniform1fARB(loc, glfwGetTime());
         });
 
-        window.setShader(&shader_program);
+        // window.setShader(&shader_program);
 
         while (!window.shouldClose()) {
             int width, height;
