@@ -54,20 +54,27 @@ namespace Breakout {
 
         static Brick *createBrickByID (Window &window, unsigned id, double x, double y) {
 
-            Brick *brick = nullptr;
             std::default_random_engine gen(glfwGetTime() * 1000000);
-            std::uniform_int_distribution<int> color(0, 255);
+            std::uniform_int_distribution<int> rgb(0, 255);
             std::uniform_real_distribution<double> alpha(0.3, 1.0);
+            BackgroundColor *bg;
 
-            switch (id % 10) {
-                case 1: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 0, 0, 1.0))); break;
-                case 2: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(0, 255, 0, 1.0))); break;
-                case 3: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(0, 0, 255, 1.0))); break;
-                case 4: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 255, 0, 1.0))); break;
-                case 5: brick = new Brick(window, {x, y, 4.0}, new BackgroundColor(Color::rgba(255, 255, 255, 1.0))); break;
+            switch (id & 15) {
+                case 0x1: bg = new BackgroundColor(Color::rgba(205, 0, 0, 1.0)); break;
+                case 0x2: bg = new BackgroundColor(Color::rgba(34, 139, 34, 1.0)); break;
+                case 0x3: bg = new BackgroundColor(Color::rgba(30, 144, 255, 1.0)); break;
+                case 0x4: bg = new BackgroundColor(Color::rgba(255, 215, 0, 1.0)); break;
+                case 0x5: bg = new BackgroundColor(Color::rgba(240, 240, 240, 1.0)); break;
+                case 0x6: bg = new BackgroundColor(Color::rgba(148, 0, 211, 1.0)); break;
+                case 0x7: bg = new BackgroundColor(Color::rgba(0, 250, 154, 1.0)); break;
+                case 0x8: bg = new BackgroundColor(Color::rgba(255, 69, 0, 1.0)); break;
+                case 0x9: bg = new BackgroundColor(Color::rgba(238, 197, 145, 1.0)); break;
+                default: bg = new BackgroundColor(Color::rgba(rgb(gen), rgb(gen), rgb(gen), alpha(gen)));
             }
 
-            return brick;
+            id >>= 4;
+
+            return new Brick(window, { x, y, 4.0 }, bg);
         }
 
     public:
@@ -100,7 +107,7 @@ namespace Breakout {
                     ss >> block;
 
                     if (block[0] != '-') {
-                        this->addBrick(std::stoul(block), x, y);
+                        this->addBrick(std::stoul(block, nullptr, 16), x, y);
                     }
                     x += Brick::DefaultWidth + Stage::DefaultHorizontalSpace;
                 }
