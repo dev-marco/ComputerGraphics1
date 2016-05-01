@@ -1,10 +1,11 @@
 # velocidade maxima
 0.01
 
+# velocidade minima
+0.008
+
 # hifen signfica espaco de bloco vazio
 - -
-- - -
--
 
 # linhas vazias sao desconsideradas
 
