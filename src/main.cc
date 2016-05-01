@@ -6,7 +6,7 @@
 #include "engine/object.h"
 #include "engine/event.h"
 #include "engine/shader.h"
-#include "engine/shaders/cgwg_crt.h"
+#include "engine/shaders/waveshader.h"
 #include "breakout/brick.h"
 #include "breakout/stage.h"
 
@@ -46,8 +46,8 @@ int main (int argc, const char **argv) {
         Shader::Program shader_program;
 
         try {
-            shader_program.attachVertexShader({ Shader::cgwg_CRT_vertex });
-            shader_program.attachFragmentShader({ Shader::cgwg_CRT_fragment });
+            shader_program.attachVertexShader({ Shader::wave_vertex });
+            shader_program.attachFragmentShader({ Shader::wave_fragment });
         } catch (std::string err) {
             std::cout << err << std::endl;
             return -1;
