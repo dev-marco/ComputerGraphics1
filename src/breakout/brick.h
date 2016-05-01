@@ -22,7 +22,7 @@ namespace Breakout {
 
         static constexpr double DefaultWidth = 0.19, DefaultHeight = 0.05;
 
-        Brick (
+        inline Brick (
             Window &_window,
             const std::array<double, 3> &_position,
             Background *_background,
@@ -60,7 +60,7 @@ namespace Breakout {
 
     public:
 
-        BonusBrick (
+        inline BonusBrick (
             Window &_window,
             const std::array<double, 3> &_position,
             Background *_background,
