@@ -59,20 +59,36 @@ public:
 
     void onCollision (const Object *other) {
 
-        if (other->getType() == "breakout_brick") {
+        bool is_brick = other->getType() == "breakout_brick", is_paddler = other->getType() == "breakout_paddler";
+
+        if (is_brick || is_paddler) {
 
             std::valarray<double> other_position = other->getPosition(), my_position = this->getPosition(), speed = this->getSpeed();
-            const Rectangle2D *rect = static_cast<const Rectangle2D *>(other->getMesh());
+            const Rectangle2D *rect = static_cast<const Rectangle2D *>(other->getCollider());
+
+            other_position += rect->getPosition();
 
             if ((my_position[0] >= other_position[0]) && (my_position[0] <= other_position[0] + rect->getWidth())) {
-                speed[1] = -speed[1];
+                if (my_position[1] >= other_position[1]) {
+                    speed[1] = std::abs(speed[1]);
+                } else {
+                    speed[1] = -std::abs(speed[1]);
+                }
             } else {
-                speed[0] = -speed[0];
+                if (my_position[0] >= other_position[0]) {
+                    speed[0] = std::abs(speed[0]);
+                } else {
+                    speed[0] = -std::abs(speed[0]);
+                }
             }
 
-            this->setSpeed(speed/* TODO * 0.99*/);
-
-        } else if (other->getType() == "breakout_paddler") {
+            if (is_brick) {
+                // deacelerate
+                this->setSpeed(speed * 0.99);
+            } else {
+                // add paddler speed
+                this->setSpeed(speed + (other->getSpeed() * 0.5));
+            }
 
         }
 
@@ -81,6 +97,23 @@ public:
     void setSpeed (const std::valarray<double> &_speed) {
         std::valarray<double> speed(_speed);
         double size = std::sqrt((speed * speed).sum());
+        constexpr double min_dir_speed = 0.001;
+
+        if (speed[0] >= -min_dir_speed && speed[0] <= min_dir_speed) {
+            if (speed[0] < 0) {
+                speed[0] = -min_dir_speed;
+            } else {
+                speed[0] = min_dir_speed;
+            }
+        }
+
+        if (speed[1] >= -min_dir_speed && speed[1] <= min_dir_speed) {
+            if (speed[1] < 0) {
+                speed[1] = -min_dir_speed;
+            } else {
+                speed[1] = min_dir_speed;
+            }
+        }
 
         if (size > this->max_speed) {
             speed = Ball::resizeVector(_speed, size, this->max_speed);
