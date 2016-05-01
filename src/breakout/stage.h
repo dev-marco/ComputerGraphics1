@@ -10,6 +10,7 @@
 #include <chrono>
 #include "brick.h"
 #include "ball.h"
+#include "paddler.h"
 #include "../engine/window.h"
 
 namespace Breakout {
@@ -114,7 +115,8 @@ namespace Breakout {
                 y -= Brick::DefaultHeight + Stage::DefaultVerticalSpace;
             }
 
-            window.addObject(new Ball(max_speed, min_speed));
+            this->window.addObject(new Ball(max_speed, min_speed));
+            this->window.addObject(new Paddler(this->window));
         }
 
         void addBrick (unsigned id, double x, double y) {
