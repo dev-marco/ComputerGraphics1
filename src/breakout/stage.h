@@ -80,9 +80,13 @@ namespace Breakout {
             std::ifstream input(file, std::ios::in);
             std::string block;
             std::stringstream ss(Stage::nextLine(input, ok));
-            double max_speed, x, y = 1.0 - (Stage::DefaultVerticalSpace / 2.0) - Brick::DefaultHeight;
+            double max_speed, min_speed, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0) - Brick::DefaultHeight;
 
             ss >> max_speed;
+
+            ss.str(Stage::nextLine(input, ok));
+
+            ss.seekg(0) >> min_speed;
 
             for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
 
@@ -103,7 +107,7 @@ namespace Breakout {
                 y -= Brick::DefaultHeight + Stage::DefaultVerticalSpace;
             }
 
-            window.addObject(new Ball(max_speed));
+            window.addObject(new Ball(max_speed, min_speed));
         }
 
         void addBrick (unsigned id, double x, double y) {
