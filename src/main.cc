@@ -88,7 +88,10 @@ int main (int argc, const char **argv) {
             window.swapBuffers();
             glfwPollEvents();
 
-            window.sync(60);
+            unsigned fps = window.sync(60);
+            if (fps != 60) {
+                std::cout << fps << " FPS" << std::endl;
+            }
         }
     } else {
         std::cerr << "ERROR: Could not initialize window" << std::endl;
