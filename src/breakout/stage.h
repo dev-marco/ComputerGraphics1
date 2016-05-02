@@ -116,7 +116,7 @@ namespace Breakout {
             }
 
             this->window.addObject(new Ball(max_speed, min_speed));
-            this->window.addObject(new Paddler(this->window));
+            this->window.addObject(new Paddler(this->window, max_speed / 1.5));
         }
 
         void addBrick (unsigned id, double x, double y) {
