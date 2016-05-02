@@ -53,7 +53,7 @@ namespace Breakout {
         	return line;
         }
 
-        static Brick *createBrickByID (Window &window, unsigned id, double x, double y) {
+        static Brick *createBrickByID (Window &window, unsigned id, double x, double y, double width, double height) {
 
             std::default_random_engine gen(glfwGetTime() * 1000000);
             std::uniform_int_distribution<int> rgb(0, 255);
@@ -75,7 +75,7 @@ namespace Breakout {
 
             id >>= 4;
 
-            return new Brick(window, { x, y, 4.0 }, bg);
+            return new Brick(window, { x, y, 4.0 }, bg, width, height);
         }
 
     public:
@@ -88,13 +88,18 @@ namespace Breakout {
             std::ifstream input(file, std::ios::in);
             std::string block;
             std::stringstream ss(Stage::nextLine(input, ok));
-            double max_speed, min_speed, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0) - Brick::DefaultHeight;
+            double max_speed, min_speed, width, height, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0) - Brick::DefaultHeight;
 
             ss >> max_speed;
 
             ss.str(Stage::nextLine(input, ok));
-
             ss.seekg(0) >> min_speed;
+
+            ss.str(Stage::nextLine(input, ok));
+            ss.seekg(0) >> width;
+
+            ss.str(Stage::nextLine(input, ok));
+            ss.seekg(0) >> height;
 
             for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
 
@@ -108,20 +113,20 @@ namespace Breakout {
                     ss >> block;
 
                     if (block[0] != '-') {
-                        this->addBrick(std::stoul(block, nullptr, 16), x, y);
+                        this->addBrick(std::stoul(block, nullptr, 16), x, y, width, height);
                     }
-                    x += Brick::DefaultWidth + Stage::DefaultHorizontalSpace;
+                    x += width + Stage::DefaultHorizontalSpace;
                 }
-                y -= Brick::DefaultHeight + Stage::DefaultVerticalSpace;
+                y -= height + Stage::DefaultVerticalSpace;
             }
 
             this->window.addObject(new Ball(max_speed, min_speed));
             this->window.addObject(new Paddler(this->window, max_speed / 1.5));
         }
 
-        void addBrick (unsigned id, double x, double y) {
+        void addBrick (unsigned id, double x, double y, double width, double height) {
 
-            Brick *brick = Stage::createBrickByID(this->window, id, x, y);
+            Brick *brick = Stage::createBrickByID(this->window, id, x, y, width, height);
 
             if (brick) {
                 if (brick->isDestructible()) {

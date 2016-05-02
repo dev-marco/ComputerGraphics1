@@ -4,6 +4,12 @@
 # velocidade minima
 0.48
 
+# largura do bloco
+0.05
+
+# altura do bloco
+0.05
+
 # hifen signfica espaco de bloco vazio
 - -
 
