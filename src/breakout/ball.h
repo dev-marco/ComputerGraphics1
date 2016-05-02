@@ -13,14 +13,6 @@ class Ball : public Object {
 
 public:
 
-    inline static std::valarray<double> resizeVector (const std::valarray<double> &vector, double vector_size, double size) {
-        return vector * (size / vector_size);
-    }
-
-    inline static std::valarray<double> resizeVector (const std::valarray<double> &vector, double size) {
-        return Ball::resizeVector(vector, std::sqrt((vector * vector).sum()), size);
-    }
-
     Ball (double _max_speed, double _min_speed) : Object(
         { 0.0, 0.0, 4.0 },
         true,
@@ -33,10 +25,10 @@ public:
         std::uniform_real_distribution<double> speed(1.0, 2.0);
 
         sphere_mesh = static_cast<const Sphere2D *>(this->getMesh());
-        this->setSpeed(Ball::resizeVector({ speed(gen), speed(gen), 0.0 }, this->min_speed));
+        this->setSpeed(Object::resizeVector({ speed(gen), speed(gen), 0.0 }, this->min_speed));
     }
 
-    inline void afterUpdate (double now, unsigned tick) {
+    inline void afterUpdate (double now, double delta_time, unsigned tick) {
 
         std::valarray<double> position = this->getPosition(), speed = this->getSpeed();
         double radius = this->sphere_mesh->getRadius();
@@ -84,10 +76,10 @@ public:
 
             if (is_brick) {
                 // deacelerate
-                this->setSpeed(speed * 0.99);
+                this->setSpeed(speed * 0.95);
             } else {
                 // add paddler speed
-                this->setSpeed(speed + (other->getSpeed() * 0.5));
+                this->setSpeed(speed + (other->getSpeed() * 0.4));
             }
 
         }
@@ -96,29 +88,35 @@ public:
 
     void setSpeed (const std::valarray<double> &_speed) {
         std::valarray<double> speed(_speed);
-        double size = std::sqrt((speed * speed).sum());
+        double size;
         constexpr double min_dir_speed = 0.001;
 
-        if (speed[0] >= -min_dir_speed && speed[0] <= min_dir_speed) {
-            if (speed[0] < 0) {
-                speed[0] = -min_dir_speed;
+        if (speed[0] == 0.0) {
+            speed[0] = min_dir_speed;
+        }
+
+        if (speed[1] == 0.0) {
+            speed[1] = min_dir_speed;
+        }
+
+        if (std::abs(speed[1] / speed[0]) < 0.5) {
+            if (speed[1] < 0) {
+                speed[1] = std::abs(speed[0]) * -0.5;
             } else {
-                speed[0] = min_dir_speed;
+                speed[1] = std::abs(speed[0]) * 0.5;
             }
         }
 
-        if (speed[1] >= -min_dir_speed && speed[1] <= min_dir_speed) {
-            if (speed[1] < 0) {
-                speed[1] = -min_dir_speed;
-            } else {
-                speed[1] = min_dir_speed;
-            }
-        }
+        size = Object::vectorSize(speed);
 
         if (size > this->max_speed) {
-            speed = Ball::resizeVector(_speed, size, this->max_speed);
+            speed = Object::resizeVector(speed, size, this->max_speed);
         } else if (size < this->min_speed) {
-            speed = Ball::resizeVector(_speed, size, this->min_speed);
+            if (size == 0.0) {
+                speed = { 1.0, 1.0, 0.0 };
+                size = std::sqrt(2.0);
+            }
+            speed = Object::resizeVector(speed, size, this->min_speed);
         }
 
         Object::setSpeed(speed);
