@@ -10,7 +10,9 @@
 #include "breakout/brick.h"
 #include "breakout/stage.h"
 
-int main (int argc, const char **argv) {
+#define WINDOW_FPS 60
+
+int main (int argc, char **argv) {
 
     if (argc < 2) {
         std::cerr << "You should pass the name of the stage via terminal." << std::endl;
@@ -60,6 +62,8 @@ int main (int argc, const char **argv) {
             glUniform1fARB(loc, glfwGetTime());
         });
 
+        std::string text = "BreakOut!!!";
+
         // window.setShader(&shader_program);
 
         while (!window.shouldClose()) {
@@ -88,8 +92,8 @@ int main (int argc, const char **argv) {
             window.swapBuffers();
             glfwPollEvents();
 
-            unsigned fps = window.sync(60);
-            if (fps != 60) {
+            unsigned fps = window.sync(WINDOW_FPS);
+            if (fps != WINDOW_FPS) {
                 std::cout << fps << " FPS" << std::endl;
             }
         }
