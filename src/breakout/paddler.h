@@ -12,7 +12,7 @@ namespace Breakout {
     class Paddler : public Object {
 
     public:
-        inline Paddler (Window &window) : Object(
+        inline Paddler (Window &window, double max_speed) : Object(
             { 0.0, -0.95, 4.0 },
             true,
             new Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
@@ -20,17 +20,24 @@ namespace Breakout {
             new BackgroundColor(Color::rgba(255, 255, 255, 1.0))
         ) {
             window.eraseEvent<Event::MouseMove>("mousemove.paddler");
-            window.event<Event::MouseMove>([this] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
+            window.event<Event::MouseMove>([this, max_speed] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
+                std::valarray<double> speed;
+                double size;
                 if (posx > 1.0) {
                     posx = 1.0;
                 } else if (posx <= -1.0) {
                     posx = -1.0;
                 }
-                this->setSpeed({ posx * 0.02, 0.0, 0.0 });
+                speed = { posx * 1.2, 0.0, 0.0 };
+                size = Object::vectorSize(speed);
+                if (size > max_speed) {
+                    speed = Object::resizeVector(speed, size, max_speed);
+                }
+                this->setSpeed(speed);
             }, "mousemove.paddler");
         }
 
-        void afterUpdate (double now, unsigned tick) {
+        void afterUpdate (double now, double delta_time, unsigned tick) {
 
             std::valarray<double> position = this->getPosition();
             double border = 1.0 - (static_cast<const Rectangle2D *>(this->getMesh())->getWidth() / 2.0);
