@@ -17,8 +17,48 @@ namespace Breakout {
 
     class Stage {
 
+        enum BonusType : int {
+
+            BonusWave,
+            BonusRotate,
+            BonusBall,
+            BonusPaddler,
+
+            BonusTypeSize
+
+        };
+
         Window &window;
         std::unordered_set<Brick *> can_destroy, cannot_destroy;
+
+        std::unordered_map<int, unsigned> activeBonuses;
+
+        void deactivateBonus (BonusType type) {
+
+        }
+
+        void activateBonus (BonusType type) {
+
+            if (activeBonuses[type]) {
+                this->window.clearTimeout(activeBonuses[type]);
+            }
+
+            switch (type) {
+                case BonusType::BonusWave:
+
+                break;
+                case BonusType::BonusRotate:
+
+                break;
+                case BonusType::BonusBall:
+
+                break;
+                case BonusType::BonusPaddler:
+
+                break;
+                default: break;
+            }
+        }
 
         static inline bool not_space (int c) {
         	return !isspace(c);
@@ -45,7 +85,7 @@ namespace Breakout {
         	std::string line = "";
         	do {
         		std::getline(in, line);
-        		line = line.substr(0, line.find_first_of('#'));
+        		line = line.substr(0, line.find_first_of('>'));
         	} while (!trim(line).size() && in.good());
 
             ok = line.size() > 0;
@@ -53,29 +93,29 @@ namespace Breakout {
         	return line;
         }
 
-        static Brick *createBrickByID (Window &window, unsigned id, double x, double y, double width, double height) {
+        Brick *createBrickByID (Window &window, const std::string &id, double x, double y, double width, double height) {
 
             std::default_random_engine gen(glfwGetTime() * 1000000);
             std::uniform_int_distribution<int> rgb(0, 255);
             std::uniform_real_distribution<double> alpha(0.3, 1.0);
-            BackgroundColor *bg;
+            unsigned divisor = id.find_first_of('#'), type = stoul(id.substr(0, divisor));
+            Brick *brick = nullptr;
 
-            switch (id & 15) {
-                case 0x1: bg = new BackgroundColor(Color::rgba(205, 0, 0, 1.0)); break;
-                case 0x2: bg = new BackgroundColor(Color::rgba(34, 139, 34, 1.0)); break;
-                case 0x3: bg = new BackgroundColor(Color::rgba(30, 144, 255, 1.0)); break;
-                case 0x4: bg = new BackgroundColor(Color::rgba(255, 215, 0, 1.0)); break;
-                case 0x5: bg = new BackgroundColor(Color::rgba(240, 240, 240, 1.0)); break;
-                case 0x6: bg = new BackgroundColor(Color::rgba(148, 0, 211, 1.0)); break;
-                case 0x7: bg = new BackgroundColor(Color::rgba(0, 250, 154, 1.0)); break;
-                case 0x8: bg = new BackgroundColor(Color::rgba(255, 69, 0, 1.0)); break;
-                case 0x9: bg = new BackgroundColor(Color::rgba(238, 197, 145, 1.0)); break;
-                default: bg = new BackgroundColor(Color::rgba(rgb(gen), rgb(gen), rgb(gen), alpha(gen)));
+            BackgroundColor *bg = new BackgroundColor(Color::hex(id.substr(divisor)));
+
+            if (type < 4) {
+                brick = new Brick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type);
+            } else if (type < 7) {
+                brick = new BonusBrick(window, { x, y, 4.0 }, bg, [this] (void) mutable {
+                    std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
+                    std::uniform_int_distribution<int> rand(0, BonusType::BonusTypeSize - 1);
+                    this->activateBonus(static_cast<BonusType>(rand(gen)));
+                }, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
+            } else if (type <= 8) {
+                brick = new AbstractBrick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 7);
             }
 
-            id >>= 4;
-
-            return new Brick(window, { x, y, 4.0 }, bg, width, height);
+            return brick;
         }
 
     public:
@@ -101,6 +141,9 @@ namespace Breakout {
             ss.str(Stage::nextLine(input, ok));
             ss.seekg(0) >> height;
 
+            this->window.addObject(new Ball(max_speed, min_speed));
+            this->window.addObject(new Paddler(this->window, max_speed / 1.5));
+
             for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
 
                 x = -1.0 + (Stage::DefaultHorizontalSpace / 2.0);
@@ -113,18 +156,19 @@ namespace Breakout {
                     ss >> block;
 
                     if (block[0] != '-') {
-                        this->addBrick(std::stoul(block, nullptr, 16), x, y, width, height);
+                        this->addBrick(block, x, y, width, height);
                     }
                     x += width + Stage::DefaultHorizontalSpace;
                 }
                 y -= height + Stage::DefaultVerticalSpace;
             }
-
-            this->window.addObject(new Ball(max_speed, min_speed));
-            this->window.addObject(new Paddler(this->window, max_speed / 1.5));
         }
 
-        void addBrick (unsigned id, double x, double y, double width, double height) {
+        ~Stage () {
+
+        }
+
+        void addBrick (const std::string &id, double x, double y, double width, double height) {
 
             Brick *brick = Stage::createBrickByID(this->window, id, x, y, width, height);
 
