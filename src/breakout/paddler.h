@@ -40,7 +40,7 @@ namespace Breakout {
         void afterUpdate (double now, double delta_time, unsigned tick) {
 
             std::valarray<double> position = this->getPosition();
-            double border = 1.0 - (static_cast<const Rectangle2D *>(this->getMesh())->getWidth() / 2.0);
+            double border = 1.0 - (static_cast<Rectangle2D *>(this->getMesh())->getWidth() / 2.0);
 
             if (position[0] <= -border) {
                 position[0] = -border;
