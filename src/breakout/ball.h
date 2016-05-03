@@ -3,6 +3,7 @@
 
 #include <valarray>
 #include <random>
+#include <chrono>
 #include <cmath>
 #include "brick.h"
 #include "../engine/object.h"
@@ -17,18 +18,18 @@ namespace Breakout {
     public:
 
         Ball (double _max_speed, double _min_speed) : Object(
-            { 0.1, 0.0, 4.0 },
+            { 0.0, 0.0, 4.0 },
             true,
             new Sphere2D({ 0.0, 0.0, 0.0 }, 0.025),
             new Sphere2D({ 0.0, 0.0, 0.0 }, 0.025),
             new BackgroundColor(Color::rgba(255, 255, 255, 0.5))
         ), max_speed(_max_speed), min_speed(_min_speed) {
 
-            std::default_random_engine gen(glfwGetTime() * 1000000);
-            std::uniform_real_distribution<double> speed(1.0, 2.0);
+            std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
+            std::uniform_real_distribution<double> speed(-1.0, 1.0);
 
             this->sphere_mesh = static_cast<Sphere2D *>(this->getMesh());
-            this->setSpeed(Object::resizeVector({ 0.0*speed(gen), 1.0+0.0*speed(gen), 0.0 }, this->min_speed));
+            this->setSpeed(Object::resizeVector({ speed(gen), speed(gen), 0.0 }, this->min_speed));
         }
 
         inline void afterUpdate (double now, double delta_time, unsigned tick) {
