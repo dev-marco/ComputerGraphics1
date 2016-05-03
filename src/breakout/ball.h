@@ -14,7 +14,7 @@ class Ball : public Object {
 public:
 
     Ball (double _max_speed, double _min_speed) : Object(
-        { 0.0, 0.0, 4.0 },
+        { 0.1, 0.0, 4.0 },
         true,
         new Sphere2D({ 0.0, 0.0, 0.0 }, 0.025),
         new Sphere2D({ 0.0, 0.0, 0.0 }, 0.025),
@@ -24,8 +24,8 @@ public:
         std::default_random_engine gen(glfwGetTime() * 1000000);
         std::uniform_real_distribution<double> speed(1.0, 2.0);
 
-        sphere_mesh = static_cast<const Sphere2D *>(this->getMesh());
-        this->setSpeed(Object::resizeVector({ speed(gen), speed(gen), 0.0 }, this->min_speed));
+        this->sphere_mesh = static_cast<Sphere2D *>(this->getMesh());
+        this->setSpeed(Object::resizeVector({ 0.0*speed(gen), 1.0+0.0*speed(gen), 0.0 }, this->min_speed));
     }
 
     inline void afterUpdate (double now, double delta_time, unsigned tick) {
@@ -49,44 +49,42 @@ public:
         this->setSpeed(speed);
     }
 
-    void onCollision (const Object *other) {
+    void onCollision (const Object *other, const std::valarray<double> &point) {
 
         bool is_brick = other->getType() == "breakout_brick", is_paddler = other->getType() == "breakout_paddler";
 
         if (is_brick || is_paddler) {
 
-            std::valarray<double> other_position = other->getPosition(), my_position = this->getPosition(), speed = this->getSpeed();
-            const Rectangle2D *rect = static_cast<const Rectangle2D *>(other->getCollider());
+            std::valarray<double>
+                speed = this->getSpeed(),
+                diff = point - this->getPosition(),
+                abs_diff = std::abs(diff);
 
-            other_position += rect->getPosition();
-
-            if ((my_position[0] >= other_position[0]) && (my_position[0] <= other_position[0] + rect->getWidth())) {
-                if (my_position[1] >= other_position[1]) {
-                    speed[1] = std::abs(speed[1]);
-                } else {
-                    speed[1] = -std::abs(speed[1]);
-                }
-            } else {
-                if (my_position[0] >= other_position[0]) {
+            if (abs_diff[0] > abs_diff[1]) {
+                if (diff[0] < 0) {
                     speed[0] = std::abs(speed[0]);
                 } else {
                     speed[0] = -std::abs(speed[0]);
+                }
+            } else {
+                if (diff[1] < 0) {
+                    speed[1] = std::abs(speed[1]);
+                } else {
+                    speed[1] = -std::abs(speed[1]);
                 }
             }
 
             if (is_brick) {
                 // deacelerate
-                this->setSpeed(speed * 0.95);
+                this->setSpeed(speed * 0.9);
             } else {
                 // add paddler speed
                 this->setSpeed(speed + (other->getSpeed() * 0.4));
             }
-
         }
-
     }
 
-    void setSpeed (const std::valarray<double> &_speed) {
+    void setSpeed (const std::valarray<double> &_speed, double update = 0.0) {
         std::valarray<double> speed(_speed);
         double size;
         constexpr double min_dir_speed = 0.001;
@@ -118,6 +116,8 @@ public:
             }
             speed = Object::resizeVector(speed, size, this->min_speed);
         }
+
+        this->setPosition(this->getPosition() + speed * update);
 
         Object::setSpeed(speed);
     }

@@ -40,7 +40,7 @@ namespace Breakout {
 
         inline bool isDestructible (void) const { return this->lives > 0; }
 
-        inline void onCollision (const Object *other) {
+        inline void onCollision (const Object *other, const std::valarray<double> &point) {
 
             if (other->getType() == "breakout_ball" && this->lives > 0) {
 
