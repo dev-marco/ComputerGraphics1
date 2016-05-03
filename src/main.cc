@@ -57,12 +57,10 @@ int main (int argc, char **argv) {
 
         shader_program.link();
 
-        shader_program.onAfterUse([] (const Shader::Program *program) {
+        shader_program.onAfterUse([] (Shader::Program *program) {
             GLint loc = program->getUniformLocationARB("time");
             glUniform1fARB(loc, glfwGetTime());
         });
-
-        std::string text = "BreakOut!!!";
 
         // window.setShader(&shader_program);
 
