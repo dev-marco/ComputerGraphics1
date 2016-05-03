@@ -17,6 +17,7 @@ namespace Breakout {
         Window &window;
         double width, height;
         unsigned lives;
+        bool draw_border;
 
     public:
 
@@ -30,15 +31,29 @@ namespace Breakout {
             double _height = Brick::DefaultHeight,
             const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
             const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0},
-            unsigned _lives = 1
-        ) : Object(_position, true, new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration), window(_window), width(_width), height(_height), lives(_lives) {}
+            unsigned _lives = 1,
+            bool _draw_border = true
+        ) :
+            Object(_position, true, new Rectangle2D({0.0, 0.0, 0.0}, _width, _height),
+            new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration),
+            window(_window),
+            width(_width),
+            height(_height),
+            lives(_lives),
+            draw_border(_draw_border) {}
 
         std::string getType (void) const { return "breakout_brick"; }
+        virtual std::string brickType (void) const { return "brick"; }
 
         inline double getWidth (void) const { return this->width; }
         inline double getheight (void) const { return this->height; }
 
-        inline bool isDestructible (void) const { return this->lives > 0; }
+        inline unsigned getLives (void) const { return this->lives; }
+        inline bool isDestructible (void) const { return this->getLives() > 0; }
+
+        inline Window &getWindow (void) const { return this->window; }
+
+        virtual inline void onChangeLives () {}
 
         inline void onCollision (const Object *other, const std::valarray<double> &point) {
 
@@ -48,15 +63,29 @@ namespace Breakout {
 
                 if (this->lives == 0) {
                     this->destroy();
+                } else {
+                    this->onChangeLives();
                 }
             }
         }
 
-        inline Window &getWindow (void) const { return this->window; }
+        inline void beforeDraw (double ratio, bool only_border) const {
+            if (draw_border) {
+                BackgroundColor bg;
+                if (this->isDestructible()) {
+                    bg = BackgroundColor(Color::rgba(255, 255, 255, 0.1 * this->getLives()));
+                } else {
+                    bg = BackgroundColor(Color::rgba(255, 255, 255, 0.4));
+                }
+                this->getMesh()->draw(this->getPosition(), &bg, true);
+            }
+        }
 
     };
 
     class BonusBrick : public Brick {
+
+        std::function<void(void)> bonus_function;
 
     public:
 
@@ -64,25 +93,53 @@ namespace Breakout {
             Window &_window,
             const std::array<double, 3> &_position,
             Background *_background,
+            std::function<void(void)> _bonus_function,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
             const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
             const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0},
             unsigned _lives = 1
-        ) : Brick(_window, _position, _background, _width, _height, _speed, _acceleration, _lives) {}
+        ) :
+            Brick(_window, _position, _background, _width, _height, _speed, _acceleration, _lives, true),
+            bonus_function(_bonus_function) {}
 
         void beforeDestroy (void) {
 
             Brick::beforeDestroy();
 
+            this->bonus_function();
+
             // TODO display bonus
         }
 
+        std::string brickType (void) const { return "bonus_brick"; }
+
     };
 
-    class TransitionBrick : public Brick {
+    class AbstractBrick : public Brick {
 
+        BackgroundColor *color;
 
+    public:
+
+        inline AbstractBrick (
+            Window &_window,
+            const std::array<double, 3> &_position,
+            BackgroundColor *_background,
+            double _width = Brick::DefaultWidth,
+            double _height = Brick::DefaultHeight,
+            const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
+            const std::array<double, 3> &_acceleration = {0.0, 0.0, 0.0},
+            unsigned _lives = 1
+        ) : Brick(_window, _position, _background, _width, _height, _speed, _acceleration, _lives, false), color(_background) {
+            if (this->isDestructible()) {
+                this->color->setA(0.25);
+            } else {
+                this->color->setA(0.5);
+            }
+        }
+
+        std::string brickType (void) const { return "abstract_brick"; }
 
     };
 
