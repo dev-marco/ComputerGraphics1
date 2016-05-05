@@ -10,25 +10,30 @@
 
 namespace Breakout {
 
-    class Ball : public Object {
+    class Ball : public Engine::Object {
 
-        const Sphere2D *sphere_mesh;
+        Engine::Sphere2D *sphere_mesh, *sphere_collider;
         double max_speed, min_speed;
 
     public:
 
-        Ball (double _max_speed, double _min_speed) : Object(
+        static constexpr double DefaultRadius (void) {
+            return 0.025;
+        }
+
+        Ball (double _max_speed, double _min_speed) : Engine::Object(
             { 0.0, 0.0, 4.0 },
             true,
-            new Sphere2D({ 0.0, 0.0, 0.0 }, 0.025),
-            new Sphere2D({ 0.0, 0.0, 0.0 }, 0.025),
-            new BackgroundColor(Color::rgba(255, 255, 255, 0.5))
+            new Engine::Sphere2D({ 0.0, 0.0, 0.0 }, Ball::DefaultRadius()),
+            new Engine::Sphere2D({ 0.0, 0.0, 0.0 }, Ball::DefaultRadius()),
+            new Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 0.5))
         ), max_speed(_max_speed), min_speed(_min_speed) {
 
             std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
             std::uniform_real_distribution<double> speed(-1.0, 1.0);
 
-            this->sphere_mesh = static_cast<Sphere2D *>(this->getMesh());
+            this->sphere_mesh = static_cast<Engine::Sphere2D *>(this->getMesh());
+            this->sphere_collider = static_cast<Engine::Sphere2D *>(this->getCollider());
             this->setSpeed(Object::resizeVector({ speed(gen), speed(gen), 0.0 }, this->min_speed));
         }
 
@@ -51,6 +56,15 @@ namespace Breakout {
             }
 
             this->setSpeed(speed);
+        }
+
+        inline void setRadius (double _radius) {
+            this->sphere_mesh->setRadius(_radius);
+            this->sphere_collider->setRadius(_radius);
+        }
+
+        inline double getRadius (void) const {
+            return this->sphere_mesh->getRadius();
         }
 
         void onCollision (const Object *other, const std::valarray<double> &point) {
