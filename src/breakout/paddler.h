@@ -29,9 +29,9 @@ namespace Breakout {
                     posx = -1.0;
                 }
                 speed = { posx * 1.2, 0.0, 0.0 };
-                size = Object::vectorSize(speed);
+                size = Engine::Mesh::raySize(speed);
                 if (size > max_speed) {
-                    speed = Object::resizeVector(speed, size, max_speed);
+                    speed = Engine::Mesh::resizeRay(speed, size, max_speed);
                 }
                 this->setSpeed(speed);
             }, "mousemove.paddler");
