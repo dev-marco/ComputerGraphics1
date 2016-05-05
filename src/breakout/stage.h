@@ -49,6 +49,8 @@ namespace Breakout {
                 this->window.clearTimeout(u);
             }
 
+            this->extraTimeouts[type].clear();
+
             this->activeBonuses[type] = 0;
 
             switch (type) {
