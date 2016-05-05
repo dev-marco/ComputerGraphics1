@@ -81,22 +81,24 @@ namespace Breakout {
                     constexpr double
                         max_time = 15.0,
                         max_value = 15.0,
-                        half_time = max_time * 0.5;
+                        mid_time = max_time * 0.5,
+                        delta_time = max_time - mid_time;
 
                     const double
                         start_time = glfwGetTime(),
-                        start_value = activeBonuses[type] ? Stage::wave_function() : 0.0;
+                        start_value = activeBonuses[type] ? Stage::wave_function() : 0.0,
+                        delta_value = max_value - start_value;
 
                     bonus_time = max_time;
 
-                    Stage::wave_function = [ start_value, max_value, start_time, half_time ] () {
+                    Stage::wave_function = [ start_value, max_value, delta_value, start_time, mid_time, delta_time, max_time ] () {
 
-                        double delta_time = glfwGetTime() - start_time;
+                        double now = glfwGetTime() - start_time;
 
-                        if (delta_time <= half_time) {
-                            return std::min(Engine::Easing::Quad::InOut(delta_time, start_value, max_value - start_value, half_time), max_value);
+                        if (now <= mid_time) {
+                            return std::min(Engine::Easing::Quad::InOut(now, start_value, delta_value, mid_time), max_value);
                         } else {
-                            return std::max(Engine::Easing::Quad::InOut(delta_time - half_time, max_value, -max_value, half_time), 0.0);
+                            return std::max(Engine::Easing::Quad::InOut(now - mid_time, max_value, -max_value, delta_time), 0.0);
                         }
                     };
 
@@ -109,12 +111,17 @@ namespace Breakout {
 
                     constexpr double
                         max_time = 15.0,
-                        half_time = max_time * 0.5,
-                        max_radius = Ball::DefaultRadius() * 2.0;
+                        mid_time = max_time * 0.125,
+                        max_radius = Ball::DefaultRadius() * 2.0,
+                        delta_time = max_time - mid_time,
+                        back_radius = Ball::DefaultRadius() - max_radius;
+
+                    Ball *ball = this->getBall();
 
                     const double
                         start_time = glfwGetTime(),
-                        start_radius = this->getBall()->getRadius();
+                        start_radius = ball->getRadius(),
+                        delta_radius = max_radius - start_radius;
 
                     bonus_time = max_time;
 
@@ -124,21 +131,27 @@ namespace Breakout {
 
                     this->extraTimeouts[type] = {
 
-                        this->window.setTimeout([ start_time, half_time, max_time, start_radius, max_radius, this ] () {
+                        this->window.setTimeout([
+                            ball,
+                            start_time, mid_time, delta_time, max_time,
+                            back_radius, start_radius, delta_radius, max_radius
+                        ] () {
 
-                            double delta_time = glfwGetTime() - start_time;
+                            double now = glfwGetTime() - start_time;
 
-                            if (delta_time <= half_time) {
-                                this->getBall()->setRadius(std::min(Engine::Easing::Elastic::InOut(delta_time, start_radius, max_radius - start_radius, half_time), max_radius));
+                            if (now <= mid_time) {
+                                ball->setRadius(std::min(
+                                    Engine::Easing::Elastic::InOut(now, start_radius, delta_radius, mid_time),
+                                    max_radius
+                                ));
                             } else {
-                                this->getBall()->setRadius(std::max(Engine::Easing::Linear(delta_time - half_time, max_radius, Ball::DefaultRadius() - max_radius, half_time), Ball::DefaultRadius()));
+                                ball->setRadius(std::max(
+                                    Engine::Easing::Expo::In(now - mid_time, max_radius, back_radius, delta_time),
+                                    Ball::DefaultRadius()
+                                ));
                             }
 
-                            if (delta_time >= max_time) {
-                                this->getBall()->setRadius(Ball::DefaultRadius());
-                                return false;
-                            }
-                            return true;
+                            return now < max_time;
                         }, 0.1)
 
                     };

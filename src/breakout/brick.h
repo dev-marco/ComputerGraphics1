@@ -69,7 +69,7 @@ namespace Breakout {
             }
         }
 
-        inline void beforeDraw (double ratio, bool only_border) const {
+        inline void beforeDraw (bool only_border) const {
             if (draw_border) {
                 Engine::BackgroundColor bg;
                 if (this->isDestructible()) {
