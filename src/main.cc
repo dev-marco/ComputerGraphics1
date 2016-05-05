@@ -41,8 +41,16 @@ int main (int argc, char **argv) {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
-        // glEnable(GL_ALPHA_TEST);
-        // glAlphaFunc(GL_GREATER, 0.5);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0);
+
+        window.addObject(
+            new Engine::Object({ 0.0, 0.0, 0.0}, true,
+                static_cast<const Engine::Sphere2D *>(stage.getBall()->getMesh())->getCollisionRectangle({0.5, 0.5}),
+                nullptr,
+                new Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 1.0))
+            )
+        );
 
         glShadeModel(GL_SMOOTH);
 
