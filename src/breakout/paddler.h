@@ -9,18 +9,18 @@
 
 namespace Breakout {
 
-    class Paddler : public Object {
+    class Paddler : public Engine::Object {
 
     public:
-        inline Paddler (Window &window, double max_speed) : Object(
+        inline Paddler (Engine::Window &window, double max_speed) : Object(
             { 0.0, -0.95, 4.0 },
             true,
-            new Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
-            new Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
-            new BackgroundColor(Color::rgba(255, 255, 255, 1.0))
+            new Engine::Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
+            new Engine::Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
+            new Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 1.0))
         ) {
-            window.eraseEvent<Event::MouseMove>("mousemove.paddler");
-            window.event<Event::MouseMove>([this, max_speed] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
+            window.eraseEvent<Engine::Event::MouseMove>("mousemove.paddler");
+            window.event<Engine::Event::MouseMove>([this, max_speed] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
                 std::valarray<double> speed;
                 double size;
                 if (posx > 1.0) {
@@ -40,7 +40,7 @@ namespace Breakout {
         void afterUpdate (double now, double delta_time, unsigned tick) {
 
             std::valarray<double> position = this->getPosition();
-            double border = 1.0 - (static_cast<Rectangle2D *>(this->getMesh())->getWidth() / 2.0);
+            double border = 1.0 - (static_cast<Engine::Rectangle2D *>(this->getMesh())->getWidth() / 2.0);
 
             if (position[0] <= -border) {
                 position[0] = -border;

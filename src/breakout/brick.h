@@ -12,9 +12,9 @@
 
 namespace Breakout {
 
-    class Brick : public Object {
+    class Brick : public Engine::Object {
 
-        Window &window;
+        Engine::Window &window;
         double width, height;
         unsigned lives;
         bool draw_border;
@@ -24,9 +24,9 @@ namespace Breakout {
         static constexpr double DefaultWidth = 0.19, DefaultHeight = 0.05;
 
         inline Brick (
-            Window &_window,
+            Engine::Window &_window,
             const std::array<double, 3> &_position,
-            Background *_background,
+            Engine::Background *_background,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
             const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
@@ -34,8 +34,8 @@ namespace Breakout {
             unsigned _lives = 1,
             bool _draw_border = true
         ) :
-            Object(_position, true, new Rectangle2D({0.0, 0.0, 0.0}, _width, _height),
-            new Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration),
+            Engine::Object(_position, true, new Engine::Rectangle2D({0.0, 0.0, 0.0}, _width, _height),
+            new Engine::Rectangle2D({0.0, 0.0, 0.0}, _width, _height), _background, _speed, _acceleration),
             window(_window),
             width(_width),
             height(_height),
@@ -51,7 +51,7 @@ namespace Breakout {
         inline unsigned getLives (void) const { return this->lives; }
         inline bool isDestructible (void) const { return this->getLives() > 0; }
 
-        inline Window &getWindow (void) const { return this->window; }
+        inline Engine::Window &getWindow (void) const { return this->window; }
 
         virtual inline void onChangeLives () {}
 
@@ -71,11 +71,11 @@ namespace Breakout {
 
         inline void beforeDraw (double ratio, bool only_border) const {
             if (draw_border) {
-                BackgroundColor bg;
+                Engine::BackgroundColor bg;
                 if (this->isDestructible()) {
-                    bg = BackgroundColor(Color::rgba(255, 255, 255, 0.1 * this->getLives()));
+                    bg = Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 0.1 * this->getLives()));
                 } else {
-                    bg = BackgroundColor(Color::rgba(255, 255, 255, 0.4));
+                    bg = Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 0.4));
                 }
                 this->getMesh()->draw(this->getPosition(), &bg, true);
             }
@@ -90,9 +90,9 @@ namespace Breakout {
     public:
 
         inline BonusBrick (
-            Window &_window,
+            Engine::Window &_window,
             const std::array<double, 3> &_position,
-            Background *_background,
+            Engine::Background *_background,
             std::function<void(void)> _bonus_function,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
@@ -118,14 +118,14 @@ namespace Breakout {
 
     class AbstractBrick : public Brick {
 
-        BackgroundColor *color;
+        Engine::BackgroundColor *color;
 
     public:
 
         inline AbstractBrick (
-            Window &_window,
+            Engine::Window &_window,
             const std::array<double, 3> &_position,
-            BackgroundColor *_background,
+            Engine::BackgroundColor *_background,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
             const std::array<double, 3> &_speed = {0.0, 0.0, 0.0},
