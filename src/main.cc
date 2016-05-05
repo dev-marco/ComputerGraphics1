@@ -5,8 +5,6 @@
 #include "engine/window.h"
 #include "engine/object.h"
 #include "engine/event.h"
-#include "engine/shader.h"
-#include "engine/shaders/waveshader.h"
 #include "breakout/brick.h"
 #include "breakout/stage.h"
 
@@ -15,7 +13,7 @@
 int main (int argc, char **argv) {
 
     if (argc < 2) {
-        std::cerr << "You should pass the name of the stage via terminal." << std::endl;
+        std::cerr << "You should pass the name of the stage(s) via terminal in order." << std::endl;
         std::cerr << "Example: $ bin/tp1 ../stages/level_00.brk" << std::endl;
         return -1;
     }
@@ -27,7 +25,7 @@ int main (int argc, char **argv) {
 
     // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    Window window = Window(720, 720, "Trabalho Pratico 1", NULL, NULL);
+    Engine::Window window(720, 720, "Trabalho Pratico 1", NULL, NULL);
 
     if (window) {
 
@@ -43,26 +41,10 @@ int main (int argc, char **argv) {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
+        // glEnable(GL_ALPHA_TEST);
+        // glAlphaFunc(GL_GREATER, 0.5);
+
         glShadeModel(GL_SMOOTH);
-
-        Shader::Program shader_program;
-
-        try {
-            shader_program.attachVertexShader({ Shader::wave_vertex });
-            shader_program.attachFragmentShader({ Shader::wave_fragment });
-        } catch (std::string err) {
-            std::cout << err << std::endl;
-            return -1;
-        }
-
-        shader_program.link();
-
-        shader_program.onAfterUse([] (Shader::Program *program) {
-            GLint loc = program->getUniformLocationARB("time");
-            glUniform1fARB(loc, glfwGetTime());
-        });
-
-        // window.setShader(&shader_program);
 
         while (!window.shouldClose()) {
             int width, height;
@@ -92,7 +74,7 @@ int main (int argc, char **argv) {
 
             unsigned fps = window.sync(WINDOW_FPS);
             if (fps != WINDOW_FPS) {
-                std::cout << fps << " FPS" << std::endl;
+                // std::cout << fps << " FPS" << std::endl;
             }
         }
     } else {
