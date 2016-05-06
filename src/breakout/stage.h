@@ -64,7 +64,7 @@ namespace Breakout {
                     this->getBall()->setRadius(Ball::DefaultRadius());
                 break;
                 case BonusType::BonusPaddler:
-
+                    this->getPaddler()->setWidth(Paddler::DefaultWidth());
                 break;
                 default: break;
             }
@@ -157,7 +157,8 @@ namespace Breakout {
                     };
                 } break;
                 case BonusType::BonusPaddler:
-
+                    bonus_time = 15.0;
+                    this->getPaddler()->setWidth(0.8);
                 break;
                 default: return;
             }
@@ -203,7 +204,7 @@ namespace Breakout {
         	return line;
         }
 
-        Brick *createBrickByID (Engine::Window &window, const std::string &id, double x, double y, double width, double height) {
+        Brick *createBrickByID (Engine::Window &window, const std::string &id, const double x, const double y, const double width, const double height) {
 
             std::default_random_engine gen(glfwGetTime() * 1000000);
             std::uniform_int_distribution<int> rgb(0, 255);
@@ -219,7 +220,7 @@ namespace Breakout {
                 brick = new BonusBrick(window, { x, y, 4.0 }, bg, [this] (void) mutable {
                     std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
                     std::uniform_int_distribution<int> rand(0, BonusType::BonusTypeSize - 1);
-                    this->activateBonus(static_cast<BonusType>(rand(gen)*0+2));
+                    this->activateBonus(static_cast<BonusType>(rand(gen)*0+3));
                 }, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
             } else if (type <= 8) {
                 brick = new AbstractBrick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 7);
@@ -238,7 +239,7 @@ namespace Breakout {
             std::ifstream input(file, std::ios::in);
             std::string block;
             std::stringstream ss(Stage::nextLine(input, ok));
-            double max_speed, min_speed, width, height, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0) - Brick::DefaultHeight;
+            double max_speed, min_speed, width, height, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0);
 
             ss >> max_speed;
 
