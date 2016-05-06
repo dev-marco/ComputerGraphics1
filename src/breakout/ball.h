@@ -34,7 +34,7 @@ namespace Breakout {
 
             this->sphere_mesh = static_cast<Engine::Sphere2D *>(this->getMesh());
             this->sphere_collider = static_cast<Engine::Sphere2D *>(this->getCollider());
-            this->setSpeed(Engine::Mesh::resizeRay({ speed(gen), speed(gen), 0.0 }, this->min_speed));
+            this->setSpeed(Engine::Mesh::resize({ speed(gen), speed(gen), 0.0 }, this->min_speed));
         }
 
         inline void afterUpdate (double now, double delta_time, unsigned tick) {
@@ -97,7 +97,7 @@ namespace Breakout {
                     this->setSpeed(speed * 0.9);
                 } else {
                     // add paddler speed
-                    this->setSpeed(speed + (other->getSpeed() * 0.4));
+                    this->setSpeed(speed + (other->getSpeed() * 0.8));
                 }
             }
         }
@@ -123,16 +123,16 @@ namespace Breakout {
                 }
             }
 
-            size = Engine::Mesh::raySize(speed);
+            size = Engine::Mesh::norm(speed);
 
             if (size > this->max_speed) {
-                speed = Engine::Mesh::resizeRay(speed, size, this->max_speed);
+                speed = Engine::Mesh::resize(speed, size, this->max_speed);
             } else if (size < this->min_speed) {
                 if (size == 0.0) {
                     speed = { 1.0, 1.0, 0.0 };
                     size = std::sqrt(2.0);
                 }
-                speed = Engine::Mesh::resizeRay(speed, size, this->min_speed);
+                speed = Engine::Mesh::resize(speed, size, this->min_speed);
             }
 
             this->setPosition(this->getPosition() + speed * update);
