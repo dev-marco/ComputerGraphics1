@@ -11,14 +11,25 @@ namespace Breakout {
 
     class Paddler : public Engine::Object {
 
+        double width, height;
+        Engine::Rectangle2D *rect_mesh, *rect_collider;
+
     public:
+
+        constexpr static double DefaultWidth (void) { return 0.4; }
+        constexpr static double DefaultHeight (void) { return 0.05; }
+
         inline Paddler (Engine::Window &window, double max_speed) : Object(
-            { 0.0, -0.95, 4.0 },
+            { 0.0, -0.90, 4.0 },
             true,
-            new Engine::Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
-            new Engine::Rectangle2D({ -0.2, 0.0, 0.0 }, 0.4, 0.05),
+            new Engine::Rectangle2D({ Paddler::DefaultWidth() * -0.5, 0.0, 0.0 }, Paddler::DefaultWidth(), Paddler::DefaultHeight()),
+            new Engine::Rectangle2D({ Paddler::DefaultWidth() * -0.5, 0.0, 0.0 }, Paddler::DefaultWidth(), Paddler::DefaultHeight()),
             new Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 1.0))
-        ) {
+        ), width(Paddler::DefaultWidth()), height(Paddler::DefaultHeight()) {
+
+            this->rect_mesh = static_cast<Engine::Rectangle2D *>(this->getMesh());
+            this->rect_collider = static_cast<Engine::Rectangle2D *>(this->getCollider());
+
             window.eraseEvent<Engine::Event::MouseMove>("mousemove.paddler");
             window.event<Engine::Event::MouseMove>([this, max_speed] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
                 std::valarray<double> speed;
@@ -29,12 +40,23 @@ namespace Breakout {
                     posx = -1.0;
                 }
                 speed = { posx * 1.2, 0.0, 0.0 };
-                size = Engine::Mesh::raySize(speed);
+                size = Engine::Mesh::norm(speed);
                 if (size > max_speed) {
-                    speed = Engine::Mesh::resizeRay(speed, size, max_speed);
+                    speed = Engine::Mesh::resize(speed, size, max_speed);
                 }
                 this->setSpeed(speed);
             }, "mousemove.paddler");
+        }
+
+        void setWidth (double _width) {
+
+            const std::valarray<double> position = { _width * -0.5, 0.0, 0.0 };
+
+            this->rect_mesh->setWidth(_width);
+            this->rect_mesh->setPosition(position);
+
+            this->rect_collider->setWidth(_width);
+            this->rect_collider->setPosition(position);
         }
 
         void afterUpdate (double now, double delta_time, unsigned tick) {
