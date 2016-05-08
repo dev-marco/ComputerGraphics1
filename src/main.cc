@@ -25,7 +25,7 @@ int main (int argc, char **argv) {
 
     // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    Engine::Window window(720, 720, "Trabalho Pratico 1", NULL, NULL);
+    Engine::Window window(720, 720, "Trabalho Pratico 1");
 
     if (window) {
 
