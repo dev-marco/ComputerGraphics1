@@ -4,6 +4,7 @@ namespace Breakout {
 
     Engine::Shader::Program Stage::shader_wave_rotate;
     double Stage::value_wave = 0.0, Stage::value_rotate = 0.0;
+    Engine::Audio::Sound Stage::bonus_sounds[static_cast<int>(BonusType::BonusTypeSize)];
 
     void Stage::activateBonusWave (const Stage::BonusType type) {
 

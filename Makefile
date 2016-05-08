@@ -4,7 +4,7 @@ CXX = c++
 CXXFLAGS = -std=c++11 -g -Wall -O3 -Wno-missing-braces
 CXXLIBS = -lglfw3
 SRC := main.cc\
- engine/object.cc engine/mesh.cc engine/background.cc engine/event.cc engine/color.cc engine/window.cc engine/shader.cc\
+ engine/object.cc engine/mesh.cc engine/background.cc engine/event.cc engine/color.cc engine/window.cc engine/shader.cc engine/audio.cc\
  breakout/brick.cc breakout/game.cc breakout/stage.cc breakout/ball.cc
 STAGES := stages/level_00.brk
 OBJ := $(SRC:%.cc=build/%.o)
@@ -12,7 +12,7 @@ DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
 
 ifeq ($(OS), Windows_NT)
-CXXLIBS += -lopengl32 -lglew32 -lglu32 -lgdi32 -static-libstdc++ -static-libgcc
+CXXLIBS += -lopengl32 -lglew32 -lglu32 -lgdi32 -lSDL2 -lSDL2_Mixer -static-libstdc++ -static-libgcc
 else
 CXXLIBS += -lGL -lGLEW -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
 endif

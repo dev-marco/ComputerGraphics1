@@ -12,16 +12,13 @@
 #include "ball.h"
 #include "paddler.h"
 #include "../engine/window.h"
+#include "../engine/audio.h"
 #include "../engine/shader.h"
 #include "../engine/shaders/waverotate.h"
 
 namespace Breakout {
 
     class Stage {
-
-        static Engine::Shader::Program shader_wave_rotate;
-        static double value_wave, value_rotate;
-        static bool active_wave, active_rotate;
 
         enum BonusType : int {
 
@@ -34,9 +31,14 @@ namespace Breakout {
 
         };
 
+        static Engine::Shader::Program shader_wave_rotate;
+        static double value_wave, value_rotate;
+        static bool active_wave, active_rotate;
+        static Engine::Audio::Sound bonus_sounds[];
+
+        Engine::Audio::Sound music;
         Engine::Window &window;
         std::unordered_set<Brick *> can_destroy, cannot_destroy;
-
         Ball *ball;
         Paddler *paddler;
         std::vector<unsigned> timeouts[static_cast<int>(BonusType::BonusTypeSize)] = { { } };
@@ -169,9 +171,9 @@ namespace Breakout {
 
             bool ok;
             std::ifstream input(file, std::ios::in);
-            std::string block;
+            std::string block, music_path = "audio/";
             std::stringstream ss(Stage::nextLine(input, ok));
-            double max_speed, min_speed, width, height, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0);
+            double max_speed, min_speed, width, height, ball_x, ball_y, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0);
 
             ss >> max_speed;
 
@@ -183,6 +185,14 @@ namespace Breakout {
 
             ss.str(Stage::nextLine(input, ok));
             ss.seekg(0) >> height;
+
+            ss.str(Stage::nextLine(input, ok));
+            ss.seekg(0) >> ball_x;
+
+            ss.str(Stage::nextLine(input, ok));
+            ss.seekg(0) >> ball_y;
+
+            music_path += Stage::nextLine(input, ok);
 
             for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
 
@@ -219,6 +229,9 @@ namespace Breakout {
                     glUniform1fARB(program->getUniformLocationARB("time"), glfwGetTime());
                 });
             }
+
+            this->music.load(music_path);
+            this->music.fadeIn(1000, -1);
 
             this->ball = new Ball(max_speed, min_speed);
             this->window.addObject(this->ball);
