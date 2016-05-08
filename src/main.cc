@@ -74,7 +74,7 @@ int main (int argc, char **argv) {
 
             unsigned fps = window.sync(WINDOW_FPS);
             if (fps != WINDOW_FPS) {
-                // std::cout << fps << " FPS" << std::endl;
+                std::cout << fps << " FPS" << std::endl;
             }
         }
     } else {
