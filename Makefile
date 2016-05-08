@@ -14,7 +14,7 @@ NAME = tp1
 ifeq ($(OS), Windows_NT)
 CXXLIBS += -lopengl32 -lglew32 -lglu32 -lgdi32 -lSDL2 -lSDL2_Mixer -static-libstdc++ -static-libgcc
 else
-CXXLIBS += -lGL -lGLEW -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread
+CXXLIBS += -lGL -lGLEW -lGLU -lXrandr -lXext -lX11 -ldl -lXxf86vm -lXinerama -lXcursor -lpthread $(shell sdl2-config --cflags --libs) -lSDL2_mixer
 endif
 
 # Fim dos parametros
