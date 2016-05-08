@@ -59,6 +59,10 @@ namespace Breakout {
             this->rect_collider->setPosition(position);
         }
 
+        double getWidth (void) {
+            return this->rect_mesh->getWidth();
+        }
+
         void afterUpdate (double now, double delta_time, unsigned tick) {
 
             std::valarray<double> position = this->getPosition();
