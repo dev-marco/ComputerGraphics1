@@ -1,0 +1,27 @@
+> velocidade maxima
+0.6
+
+> velocidade minima
+0.48
+
+> largura do bloco
+0.19
+
+> altura do bloco
+0.05
+
+> hifen signfica espaco de bloco vazio
+- -
+
+> linhas vazias sao desconsideradas
+
+> cada bloco da fase (consulte as cores no codigo)
+1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf
+1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf
+1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf
+1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+1#FFFFFF 1#FFFFFF 1#FFFFFF 0#FFFFFF 1#f6b40e 1#f6b40e 0#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf
+3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf
+7#74acdf 7#74acdf 7#74acdf 7#74acdf 8#74acdf 8#74acdf 7#74acdf 7#74acdf 7#74acdf 7#74acdf

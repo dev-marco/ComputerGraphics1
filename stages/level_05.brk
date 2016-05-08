@@ -1,0 +1,27 @@
+> velocidade maxima
+0.6
+
+> velocidade minima
+0.48
+
+> largura do bloco
+0.19
+
+> altura do bloco
+0.05
+
+> hifen signfica espaco de bloco vazio
+- -
+
+> linhas vazias sao desconsideradas
+
+> cada bloco da fase (consulte as cores no codigo)
+1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222
+1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222
+1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222 1#222222
+1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000
+1#dd0000 1#dd0000 1#dd0000 0#dd0000 1#dd0000 1#dd0000 0#dd0000 1#dd0000 1#dd0000 1#dd0000
+1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000 1#dd0000
+2#ffce00 2#ffce00 2#ffce00 2#ffce00 2#ffce00 2#ffce00 2#ffce00 2#ffce00 2#ffce00 2#ffce00
+3#ffce00 3#ffce00 3#ffce00 3#ffce00 3#ffce00 3#ffce00 3#ffce00 3#ffce00 3#ffce00 3#ffce00
+4#ffce00 4#ffce00 4#ffce00 4#ffce00 8#ffce00 8#ffce00 4#ffce00 4#ffce00 4#ffce00 4#ffce00
