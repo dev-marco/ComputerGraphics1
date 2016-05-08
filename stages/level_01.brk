@@ -10,6 +10,15 @@
 > altura do bloco
 0.05
 
+> posicao x da bola
+0.0
+
+> posicao y da bola
+0.0
+
+> nome da musica (relativo a pasta audio)
+siga_em_frente.ogg
+
 > linhas vazias sao desconsideradas
 
 > cada bloco da fase (consulte as cores no codigo)
