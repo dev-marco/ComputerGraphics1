@@ -13,14 +13,15 @@
 #include "paddler.h"
 #include "../engine/window.h"
 #include "../engine/shader.h"
-#include "../engine/shaders/waveshader.h"
+#include "../engine/shaders/waverotate.h"
 
 namespace Breakout {
 
     class Stage {
 
-        static Engine::Shader::Program shader_wave, shader_rotation;
-        static std::function<double()> wave_function;
+        static Engine::Shader::Program shader_wave_rotate;
+        static double value_wave, value_rotate;
+        static bool active_wave, active_rotate;
 
         enum BonusType : int {
 
@@ -38,27 +39,34 @@ namespace Breakout {
 
         Ball *ball;
         Paddler *paddler;
-        unsigned activeBonuses[static_cast<int>(BonusType::BonusTypeSize)] = { 0 };
-        std::vector<unsigned> extraTimeouts[static_cast<int>(BonusType::BonusTypeSize)] = { { } };
+        std::vector<unsigned> timeouts[static_cast<int>(BonusType::BonusTypeSize)] = { { } };
+        bool active_bonuses[static_cast<int>(BonusType::BonusTypeSize)] = { false };
 
-        void deactivateBonus (BonusType type) {
-
-            this->window.clearTimeout(this->activeBonuses[type]);
-
-            for (unsigned u : this->extraTimeouts[type]) {
+        void clearBonusTimeouts (const BonusType type) {
+            for (unsigned u : this->timeouts[type]) {
                 this->window.clearTimeout(u);
             }
 
-            this->extraTimeouts[type].clear();
+            this->timeouts[type].clear();
+        }
 
-            this->activeBonuses[type] = 0;
+        void deactivateBonus (const BonusType type) {
+
+            this->clearBonusTimeouts(type);
+            this->active_bonuses[type] = false;
 
             switch (type) {
                 case BonusType::BonusWave:
-                    this->window.setShader(nullptr);
+                    if (!this->active_bonuses[BonusType::BonusRotate]) {
+                        this->window.setShader(nullptr);
+                    }
+                    Stage::value_wave = 0.0;
                 break;
                 case BonusType::BonusRotate:
-
+                    if (!this->active_bonuses[BonusType::BonusWave]) {
+                        this->window.setShader(nullptr);
+                    }
+                    Stage::value_rotate = 0.0;
                 break;
                 case BonusType::BonusBall:
                     this->getBall()->setRadius(Ball::DefaultRadius());
@@ -68,107 +76,34 @@ namespace Breakout {
                 break;
                 default: break;
             }
-
         }
 
-        void activateBonus (BonusType type) {
+        void activateBonusWave(const BonusType type);
+        void activateBonusRotate(const BonusType type);
+        void activateBonusBall(const BonusType type);
+        void activateBonusPaddler(const BonusType type);
 
-            double bonus_time = 0.0;
+        void activateBonus (const BonusType type) {
+
+            this->active_bonuses[type] = true;
 
             switch (type) {
-                case BonusType::BonusWave: {
-
-                    constexpr double
-                        max_time = 15.0,
-                        max_value = 15.0,
-                        mid_time = max_time * 0.5,
-                        delta_time = max_time - mid_time;
-
-                    const double
-                        start_time = glfwGetTime(),
-                        start_value = activeBonuses[type] ? Stage::wave_function() : 0.0,
-                        delta_value = max_value - start_value;
-
-                    bonus_time = max_time;
-
-                    Stage::wave_function = [ start_value, max_value, delta_value, start_time, mid_time, delta_time, max_time ] () {
-
-                        double now = glfwGetTime() - start_time;
-
-                        if (now <= mid_time) {
-                            return std::min(Engine::Easing::Quad::InOut(now, start_value, delta_value, mid_time), max_value);
-                        } else {
-                            return std::max(Engine::Easing::Quad::InOut(now - mid_time, max_value, -max_value, delta_time), 0.0);
-                        }
-                    };
-
-                    this->window.setShader(&Stage::shader_wave);
-                } break;
+                case BonusType::BonusWave:
+                    activateBonusWave(type);
+                    this->window.setShader(&Stage::shader_wave_rotate);
+                break;
                 case BonusType::BonusRotate:
-
+                    activateBonusRotate(type);
+                    this->window.setShader(&Stage::shader_wave_rotate);
                 break;
-                case BonusType::BonusBall: {
-
-                    constexpr double
-                        max_time = 15.0,
-                        mid_time = max_time * 0.125,
-                        max_radius = Ball::DefaultRadius() * 2.0,
-                        delta_time = max_time - mid_time,
-                        back_radius = Ball::DefaultRadius() - max_radius;
-
-                    Ball *ball = this->getBall();
-
-                    const double
-                        start_time = glfwGetTime(),
-                        start_radius = ball->getRadius(),
-                        delta_radius = max_radius - start_radius;
-
-                    bonus_time = max_time;
-
-                    for (unsigned u : this->extraTimeouts[type]) {
-                        this->window.clearTimeout(u);
-                    }
-
-                    this->extraTimeouts[type] = {
-
-                        this->window.setTimeout([
-                            ball,
-                            start_time, mid_time, delta_time, max_time,
-                            back_radius, start_radius, delta_radius, max_radius
-                        ] () {
-
-                            double now = glfwGetTime() - start_time;
-
-                            if (now <= mid_time) {
-                                ball->setRadius(std::min(
-                                    Engine::Easing::Elastic::InOut(now, start_radius, delta_radius, mid_time),
-                                    max_radius
-                                ));
-                            } else {
-                                ball->setRadius(std::max(
-                                    Engine::Easing::Expo::In(now - mid_time, max_radius, back_radius, delta_time),
-                                    Ball::DefaultRadius()
-                                ));
-                            }
-
-                            return now < max_time;
-                        }, 0.1)
-
-                    };
-                } break;
+                case BonusType::BonusBall:
+                    activateBonusBall(type);
+                break;
                 case BonusType::BonusPaddler:
-                    bonus_time = 15.0;
-                    this->getPaddler()->setWidth(0.8);
+                    activateBonusPaddler(type);
                 break;
-                default: return;
+                default: break;
             }
-
-            this->window.clearTimeout(activeBonuses[type]);
-
-            activeBonuses[type] = this->window.setTimeout([this, type] (void) mutable {
-                this->deactivateBonus(type);
-                return false;
-            }, bonus_time, true);
         }
 
         static inline bool not_space (int c) {
@@ -206,9 +141,6 @@ namespace Breakout {
 
         Brick *createBrickByID (Engine::Window &window, const std::string &id, const double x, const double y, const double width, const double height) {
 
-            std::default_random_engine gen(glfwGetTime() * 1000000);
-            std::uniform_int_distribution<int> rgb(0, 255);
-            std::uniform_real_distribution<double> alpha(0.3, 1.0);
             unsigned divisor = id.find_first_of('#'), type = stoul(id.substr(0, divisor));
             Brick *brick = nullptr;
 
@@ -217,10 +149,10 @@ namespace Breakout {
             if (type < 4) {
                 brick = new Brick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type);
             } else if (type < 7) {
-                brick = new BonusBrick(window, { x, y, 4.0 }, bg, [this] (void) mutable {
-                    std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
+                brick = new BonusBrick(window, { x, y, 4.0 }, bg, [=] (void) {
+                    static std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
                     std::uniform_int_distribution<int> rand(0, BonusType::BonusTypeSize - 1);
-                    this->activateBonus(static_cast<BonusType>(rand(gen)*0+3));
+                    this->activateBonus(static_cast<BonusType>(rand(gen)));
                 }, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
             } else if (type <= 8) {
                 brick = new AbstractBrick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 7);
@@ -252,12 +184,6 @@ namespace Breakout {
             ss.str(Stage::nextLine(input, ok));
             ss.seekg(0) >> height;
 
-            this->ball = new Ball(max_speed, min_speed);
-            this->window.addObject(this->ball);
-
-            this->paddler = new Paddler(this->window, max_speed / 1.5);
-            this->window.addObject(this->paddler);
-
             for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
 
                 x = -1.0 + (Stage::DefaultHorizontalSpace / 2.0);
@@ -277,21 +203,28 @@ namespace Breakout {
                 y -= height + Stage::DefaultVerticalSpace;
             }
 
-            if (!Stage::shader_wave) {
+            if (!Stage::shader_wave_rotate) {
                 try {
-                    Stage::shader_wave.attachVertexShader({ Engine::Shader::wave_vertex });
-                    Stage::shader_wave.attachFragmentShader({ Engine::Shader::wave_fragment });
+                    Stage::shader_wave_rotate.attachVertexShader({ Engine::Shader::wave_rotate_vertex });
+                    Stage::shader_wave_rotate.attachFragmentShader({ Engine::Shader::wave_rotate_fragment });
                 } catch (std::string e) {
                     std::cerr << e << std::endl;
                 }
 
-                Stage::shader_wave.link();
+                Stage::shader_wave_rotate.link();
 
-                Stage::shader_wave.onAfterUse([] (Engine::Shader::Program *program) {
-                    glUniform1fARB(program->getUniformLocationARB("parameter"), Stage::wave_function());
+                Stage::shader_wave_rotate.onAfterUse([] (Engine::Shader::Program *program) {
+                    glUniform1fARB(program->getUniformLocationARB("parameter_wave"), Stage::value_wave);
+                    glUniform1fARB(program->getUniformLocationARB("parameter_rotate"), Stage::value_rotate);
                     glUniform1fARB(program->getUniformLocationARB("time"), glfwGetTime());
                 });
             }
+
+            this->ball = new Ball(max_speed, min_speed);
+            this->window.addObject(this->ball);
+
+            this->paddler = new Paddler(this->window, max_speed / 1.5);
+            this->window.addObject(this->paddler);
         }
 
         ~Stage () {
