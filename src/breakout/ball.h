@@ -21,8 +21,8 @@ namespace Breakout {
             return 0.025;
         }
 
-        Ball (double _max_speed, double _min_speed) : Engine::Object(
-            { 0.0, 0.0, 4.0 },
+        Ball (double _max_speed, double _min_speed, double _x = 0.0, double _y = 0.0) : Engine::Object(
+            { _x, _y, 4.0 },
             true,
             new Engine::Sphere2D({ 0.0, 0.0, 0.0 }, Ball::DefaultRadius()),
             new Engine::Sphere2D({ 0.0, 0.0, 0.0 }, Ball::DefaultRadius()),
