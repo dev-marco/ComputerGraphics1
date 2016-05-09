@@ -33,3 +33,5 @@ Funções implementadas:
 - A posição que a bola acerta no “paddle” também é utilizada para modificar a velocidade da “bola”;
 - Utilização de shaders;
 - Facilidade na criação de novas fases; 
+- Número de vidas na tela;
+- Tela de vitoria e derrota;
