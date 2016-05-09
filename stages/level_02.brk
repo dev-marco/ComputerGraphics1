@@ -16,19 +16,17 @@
 > posicao y da bola
 0.0
 
-> nome da musica (relativo a pasta audio)
+> nome da musica
 nao_chores_por_mim_argentina.ogg
 
-> hifen signfica espaco de bloco vazio
-- -
-
-> linhas vazias sao desconsideradas
-
 > cada bloco da fase (consulte as cores no codigo)
+-
 6#74acdf 6#74acdf 6#74acdf 6#74acdf 5#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf
 6#74acdf 6#74acdf 6#74acdf 6#74acdf 4#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf
 6#74acdf 6#74acdf 6#74acdf 6#74acdf 4#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf
 1#FFFFFF 1#FFFFFF 1#FFFFFF 3#FFFFFF 3#FFFFFF 3#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+1#FFFFFF 1#FFFFFF 2#FFFFFF 0#FFFFFF 0#f6b40e 0#f6b40e 2#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+1#FFFFFF 1#FFFFFF 2#FFFFFF 0#f6b40e 0#f6b40e 0#f6b40e 2#f6b40e 1#FFFFFF 1#FFFFFF 1#FFFFFF
 1#FFFFFF 1#FFFFFF 2#FFFFFF 0#FFFFFF 0#f6b40e 0#f6b40e 2#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf

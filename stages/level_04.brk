@@ -17,18 +17,19 @@
 0.0
 
 > nome da musica (relativo a pasta audio)
-COMBOIO_DO_TERROR.ogg
+comboio_do_terror.ogg
 
-> linhas vazias sao desconsideradas
-
-> cada bloco da fase (consulte as cores no codigo)
-1#FFFFFF 1#FFFFFF 4#9ab1c3 4#9ab1c3 3#152324 3#152324 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 1#FFFFFF
-1#FFFFFF 3#152324 4#9ab1c3 3#152324 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 1#FFFFFF
-1#FFFFFF 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 4#2278a9 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 1#FFFFFF
-1#FFFFFF 1#FFFFFF 3#152324 4#ba3923 3#152324 3#152324 8#FFFFFF 8#FFFFFF 3#152324 1#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF
-4#FFFFFF 3#152324 4#ba3923 3#152324 4#ba3923 3#152324 3#152324 3#152324 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 5#FFFFFF 5#FFFFFF 5#FFFFFF
-3#152324 4#ba3923 3#152324 4#ba3923 3#152324 5#FFFFFF 5#FFFFFF 5#FFFFFF 5#FFFFFF 6#FFFFFF 6#FFFFFF 6#FFFFFF 6#FFFFFF 6#FFFFFF 4#FFFFFF 4#FFFFFF 2#FFFFFF
-3#152324 4#ba3923 4#ba3923 3#152324 2#FFFFFF 2#FFFFFF 2#FFFFFF 3#FFFFFF 3#FFFFFF 3#FFFFFF 3#FFFFFF 5#FFFFFF 5#FFFFFF 5#FFFFFF 6#FFFFFF 6#FFFFFF 6#FFFFFF
-3#152324 4#ba3923 4#ba3923 3#152324 2#FFFFFF 2#FFFFFF 2#FFFFFF 3#FFFFFF 3#FFFFFF 3#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 1#FFFFFF
-3#152324 3#152324 3#152324 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
-1#FFFFFF 1#FFFFFF 1#FFFFFF 7#FFFFFF 7#FFFFFF 6#FFFFFF 6#FFFFFF 5#FFFFFF 1#FFFFFF 4#FFFFFF 5#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+> cada bloco da fase
+1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 7#FFFFFF 7#FFFFFF 6#FFFFFF 6#FFFFFF 5#FFFFFF 1#FFFFFF 4#FFFFFF 5#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+-------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- --------
+-------- -------- -------- 4#9ab1c3 4#9ab1c3 3#152324 3#152324 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 4#9ab1c3 --------
+-------- -------- 3#152324 4#9ab1c3 3#152324 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 4#2278a9 --------
+-------- -------- 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 4#2278a9 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 3#152324 --------
+-------- -------- -------- 3#152324 4#ba3923 3#152324 3#152324 -------- -------- 3#152324 -------- -------- -------- -------- -------- -------- -------- --------
+-------- -------- 3#152324 4#ba3923 3#152324 4#ba3923 3#152324 3#152324 3#152324 -------- -------- -------- -------- -------- -------- -------- -------- --------
+-------- 3#152324 4#ba3923 3#152324 4#ba3923 3#152324 -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- --------
+-------- 3#152324 4#ba3923 4#ba3923 3#152324 -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- --------
+-------- 3#152324 4#ba3923 4#ba3923 3#152324 -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- --------
+-------- 3#152324 3#152324 3#152324 -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- --------
+-------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- -------- --------
+1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 7#FFFFFF 7#FFFFFF 6#FFFFFF 6#FFFFFF 5#FFFFFF 1#FFFFFF 4#FFFFFF 5#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF

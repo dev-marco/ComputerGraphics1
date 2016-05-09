@@ -17,14 +17,10 @@
 0.0
 
 > nome da musica (relativo a pasta audio)
-Du_Hast.ogg
+du_hast.ogg
 
-> hifen signfica espaco de bloco vazio
-- -
-
-> linhas vazias sao desconsideradas
-
-> cada bloco da fase (consulte as cores no codigo)
+> cada bloco da fase
+-
 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222
 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222
 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222 5#222222

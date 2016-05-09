@@ -19,12 +19,8 @@
 > nome da musica (relativo a pasta audio)
 siga_em_frente.ogg
 
-> hifen signfica espaco de bloco vazio
-- -
-
-> linhas vazias sao desconsideradas
-
-> cada bloco da fase (consulte as cores no codigo)
+> cada bloco da fase
+-
 1#228B22 1#228B22 1#228B22 1#228B22 1#228B22 1#228B22 1#228B22 1#228B22 1#228B22 1#228B22
 1#228B22 1#228B22 1#228B22 1#228B22 1#FFD700 1#FFD700 1#228B22 1#228B22 1#228B22 1#228B22
 1#228B22 1#228B22 1#228B22 1#FFD700 1#FFD700 1#FFD700 1#FFD700 1#228B22 1#228B22 1#228B22

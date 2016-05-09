@@ -17,14 +17,10 @@
 0.0
 
 > nome da musica (relativo a pasta audio)
-E_O_Amor.ogg
+porque_homem_nao_chora.ogg
 
-> hifen signfica espaco de bloco vazio
-- -
-
-> linhas vazias sao desconsideradas
-
-> cada bloco da fase (consulte as cores no codigo)
+> cada bloco da fase
+-
 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 1#FFFFFF 4#FFFFFF
 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 1#FFFFFF 1#FFFFFF 1#d35f5f 1#d35f5f 1#FFFFFF 1#d35f5f 1#d35f5f 1#FFFFFF 1#FFFFFF 1#FFFFFF 4#FFFFFF 6#FFFFFF 4#FFFFFF 4#FFFFFF
 1#FFFFFF 4#FFFFFF 2#FFFFFF 1#FFFFFF 1#FFFFFF 1#d35f5f 1#e9afaf 1#e9afaf 1#d35f5f 1#e9afaf 1#e9afaf 1#d35f5f 1#FFFFFF 1#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF 4#FFFFFF
