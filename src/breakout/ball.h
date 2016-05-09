@@ -19,8 +19,8 @@ namespace Breakout {
         std::unique_ptr<Engine::BackgroundColor> background_color;
         double max_speed, min_speed;
         Engine::Audio::Sound
-            sound_pop = Engine::Audio::Sound("audio/ball_pop.ogg"),
-            sound_brick = Engine::Audio::Sound("audio/ball_brick.ogg");
+            sound_pop = Engine::Audio::Sound("audio/effects/ball_pop.ogg"),
+            sound_brick = Engine::Audio::Sound("audio/effects/ball_brick.ogg");
 
         std::function<void(void)> touch_bottom;
         std::function<void(const Brick *)> on_destroy;
@@ -53,8 +53,8 @@ namespace Breakout {
         inline void start (void) {
 
             std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
-            std::uniform_real_distribution<double> speed(-1.0, 1.0);
-            this->setSpeed(Engine::Mesh::resize({ speed(gen), speed(gen), 0.0 }, this->min_speed));
+            std::uniform_real_distribution<double> speed_x(-1.0, 1.0), speed_y(0.0, 1.0);
+            this->setSpeed(Engine::Mesh::resize({ speed_x(gen), speed_y(gen), 0.0 }, this->min_speed));
 
         }
 
