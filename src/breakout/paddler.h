@@ -2,6 +2,7 @@
 #define SRC_BREAKOUT_PADDLER_H_
 
 #include <iostream>
+#include <memory>
 #include "../engine/mesh.h"
 #include "../engine/window.h"
 #include "../engine/event.h"
@@ -11,27 +12,29 @@ namespace Breakout {
 
     class Paddler : public Engine::Object {
 
+        Engine::Window &window;
         double width, height;
-        Engine::Rectangle2D *rect_mesh, *rect_collider;
+        std::unique_ptr<Engine::Rectangle2D> rect_mesh, rect_collider;
+        std::unique_ptr<Engine::BackgroundColor> background_color;
 
     public:
 
         constexpr static double DefaultWidth (void) { return 0.4; }
         constexpr static double DefaultHeight (void) { return 0.05; }
 
-        inline Paddler (Engine::Window &window, double max_speed) : Object(
+        inline Paddler (Engine::Window &_window, double max_speed) : Object(
             { 0.0, -0.90, 4.0 },
             true,
             new Engine::Rectangle2D({ Paddler::DefaultWidth() * -0.5, 0.0, 0.0 }, Paddler::DefaultWidth(), Paddler::DefaultHeight()),
             new Engine::Rectangle2D({ Paddler::DefaultWidth() * -0.5, 0.0, 0.0 }, Paddler::DefaultWidth(), Paddler::DefaultHeight()),
             new Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 1.0))
-        ), width(Paddler::DefaultWidth()), height(Paddler::DefaultHeight()) {
+        ), window(_window), width(Paddler::DefaultWidth()), height(Paddler::DefaultHeight()) {
 
-            this->rect_mesh = static_cast<Engine::Rectangle2D *>(this->getMesh());
-            this->rect_collider = static_cast<Engine::Rectangle2D *>(this->getCollider());
+            this->rect_mesh.reset(static_cast<Engine::Rectangle2D *>(this->getMesh()));
+            this->rect_collider.reset(static_cast<Engine::Rectangle2D *>(this->getCollider()));
+            this->background_color.reset(static_cast<Engine::BackgroundColor *>(this->getBackground()));
 
-            window.eraseEvent<Engine::Event::MouseMove>("mousemove.paddler");
-            window.event<Engine::Event::MouseMove>([this, max_speed] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
+            this->window.event<Engine::Event::MouseMove>([this, max_speed] (GLFWwindow *window, double _x, double _y, double posx, double _posy) mutable {
                 std::valarray<double> speed;
                 double size;
                 if (posx > 1.0) {
@@ -46,6 +49,10 @@ namespace Breakout {
                 }
                 this->setSpeed(speed);
             }, "mousemove.paddler");
+        }
+
+        ~Paddler (void) {
+            this->window.eraseEvent<Engine::Event::MouseMove>("mousemove.paddler");
         }
 
         void setWidth (double _width) {
@@ -64,7 +71,6 @@ namespace Breakout {
         }
 
         void afterUpdate (double now, double delta_time, unsigned tick) {
-
             std::valarray<double> position = this->getPosition();
             double border = 1.0 - (static_cast<Engine::Rectangle2D *>(this->getMesh())->getWidth() / 2.0);
 
