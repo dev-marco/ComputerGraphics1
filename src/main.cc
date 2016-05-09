@@ -3,10 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "engine/window.h"
-#include "engine/object.h"
-#include "engine/event.h"
-#include "breakout/brick.h"
-#include "breakout/stage.h"
+#include "breakout/game.h"
 
 #define WINDOW_FPS 60
 
@@ -23,17 +20,26 @@ int main (int argc, char **argv) {
         return -1;
     }
 
-    // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
     Engine::Window window(720, 720, "Trabalho Pratico 1");
 
     if (window) {
 
+        std::vector<std::string> stages;
+
         window.makeCurrentContext();
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        window.swapBuffers();
 
         glewInit();
 
-        Breakout::Stage stage(window, argv[1]);
+        for (int i = 1; i < argc; ++i) {
+            stages.push_back(argv[i]);
+        }
+
+        Breakout::Game game(window, stages);
+
+        game.start();
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -56,13 +62,10 @@ int main (int argc, char **argv) {
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
             gluPerspective(90.0, static_cast<double>(width) / height, 1, 100);
-            // gluLookAt(0, 0, -1, 0, 0, 0, 0, 0, 0);
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             glTranslated(0.0, 0.0, -5.0);
-            // glRotated(window.getTick() % 360, 0.0, 1.0, 0.0);
-            // glRotated(window.getTick() % 360, 1.0, 0.0, 0.0);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -71,6 +74,8 @@ int main (int argc, char **argv) {
 
             window.swapBuffers();
             glfwPollEvents();
+
+            game.update();
 
             unsigned fps = window.sync(WINDOW_FPS);
             if (fps != WINDOW_FPS) {
