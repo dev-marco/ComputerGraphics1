@@ -1,0 +1,35 @@
+Compilação:
+make
+
+execução:
+make test
+
+execução pra estagio especifico:
+<executavel> <estagio>
+
+bibliotecas utilizadas:
+- OpenGL
+- GLEW
+- SDL2
+
+Funções implementadas:
+- O jogo começa no modo pausa;
+- A tecla R volta o jogo ao estado inicial, "paddle" no meio da tela e "bola" parada na posição inicial;
+- A tecla Q termina o programa;
+- O botão esquerdo do mouse pausa ou retorna ao jogo;
+- O botão da direita imprime os atributos de todos os objetos, e coloca o jogo em modo pausa, pressionado novamente, executa um ciclo do jogo, e novamente imprime todos os atributos;
+- O deslocamento vertical do mouse pode indicar um acrescimo na força a ser usada na rebatida da “bola”;
+- A velocidade do “paddle” é usada para calcular uma variação no ângulo refletido da “bola”;
+- Alguns tijolos são indestrutíveis, e eles contem uma pequena borda branca;
+- Exitem sete níveis de dificuldades, em cada nível existe uma fase diferente;
+- Alguns tijolos apresentam bônus, como:
+	* aumentar temporariamente o tamanho do “paddle”;
+	* aumentar temporariamente o tamanho da “bola”;
+	* podem aumentar ou diminuir a velocidade da bola;
+	* podem rotacionar a tela;
+	* podem gerar ondulações na fase.
+- Controle de volume da musica;
+- Musicas, sons e efeitos sonoros, que variam em cada bônus;
+- A posição que a bola acerta no “paddle” também é utilizada para modificar a velocidade da “bola”;
+- Utilização de shaders;
+- Facilidade na criação de novas fases; 
