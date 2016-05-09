@@ -17,7 +17,7 @@
 0.0
 
 > nome da musica (relativo a pasta audio)
-siga_em_frente.ogg
+nao_chores_por_mim_argentina.ogg
 
 > hifen signfica espaco de bloco vazio
 - -
@@ -25,12 +25,12 @@ siga_em_frente.ogg
 > linhas vazias sao desconsideradas
 
 > cada bloco da fase (consulte as cores no codigo)
-1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf
-1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf
-1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf 1#74acdf
-1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
-1#FFFFFF 1#FFFFFF 1#FFFFFF 0#FFFFFF 1#f6b40e 1#f6b40e 0#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+6#74acdf 6#74acdf 6#74acdf 6#74acdf 5#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf
+6#74acdf 6#74acdf 6#74acdf 6#74acdf 4#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf
+6#74acdf 6#74acdf 6#74acdf 6#74acdf 4#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf 6#74acdf
+1#FFFFFF 1#FFFFFF 1#FFFFFF 3#FFFFFF 3#FFFFFF 3#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
+1#FFFFFF 1#FFFFFF 2#FFFFFF 0#FFFFFF 0#f6b40e 0#f6b40e 2#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF 1#FFFFFF
 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf 2#74acdf
-3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf
-7#74acdf 7#74acdf 7#74acdf 7#74acdf 8#74acdf 8#74acdf 7#74acdf 7#74acdf 7#74acdf 7#74acdf
+3#74acdf 6#74acdf 6#74acdf 6#74acdf 2#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf 3#74acdf
+4#74acdf 5#74acdf 6#74acdf 6#74acdf 8#74acdf 8#74acdf 5#74acdf 6#74acdf 5#74acdf 7#74acdf
