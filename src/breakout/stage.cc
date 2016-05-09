@@ -6,6 +6,7 @@ namespace Breakout {
     double Stage::value_wave = 0.0, Stage::value_rotate = 0.0, Stage::time_wave = 0.0;
     Engine::Audio::Sound Stage::bonus_sounds[static_cast<int>(BonusType::BonusTypeSize)];
     int Stage::music_volume = 8;
+    std::default_random_engine Stage::random_generator(std::chrono::system_clock::now().time_since_epoch().count());
 
     Stage::Stage (
         Engine::Window &_window,
@@ -17,7 +18,7 @@ namespace Breakout {
         if (input.is_open()) {
 
             bool ok;
-            std::string block, music_path = "audio/";
+            std::string block, music_path = "audio/themes/";
             std::stringstream ss(Stage::nextLine(input, ok));
             double width, height, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0);
 
@@ -82,6 +83,13 @@ namespace Breakout {
                     glUniform1fARB(program->getUniformLocationARB("parameter_rotate"), Stage::value_rotate);
                     glUniform1fARB(program->getUniformLocationARB("time"), Stage::time_wave);
                 });
+
+                Stage::bonus_sounds[BonusType::BonusWave].load("audio/bonus/onda_onda.ogg");
+                Stage::bonus_sounds[BonusType::BonusRotate].load("audio/bonus/roda_roda_roda.ogg");
+                Stage::bonus_sounds[BonusType::BonusBall].load("audio/bonus/gordinho_gostoso.ogg");
+                Stage::bonus_sounds[BonusType::BonusPaddler].load("audio/bonus/mario_mushroom.ogg");
+                Stage::bonus_sounds[BonusType::BonusFastSpeed].load("audio/bonus/acelera_acelera.ogg");
+                Stage::bonus_sounds[BonusType::BonusSlowSpeed].load("audio/bonus/vai_devagar.ogg");
             }
         }
     }
@@ -172,6 +180,8 @@ namespace Breakout {
             }
         }
 
+        this->window.eraseEvent<Engine::Event::Keyboard>("keyboard.pause");
+
         if (!this->cleared) {
 
             this->cleared = true;
@@ -197,25 +207,30 @@ namespace Breakout {
         this->window.unpause(this->start_pause_context);
     }
 
-    void Stage::activateBonusWave (const Stage::BonusType type) {
+    void Stage::activateBonusWave (void) {
+
+        std::uniform_real_distribution<double> random_time(15.0, 25.0);
 
         constexpr double
-            max_time = 20.0,
             max_value = 5.0,
-            mid_time = max_time * 0.5,
-            delta_time = max_time - mid_time,
             timeout_step = 0.01;
 
         const double
+            max_time = random_time(Stage::random_generator),
+            mid_time = max_time * 0.5,
+            delta_time = max_time - mid_time,
             start_value = Stage::value_wave,
             delta_value = max_value - start_value;
 
         std::shared_ptr<double> now_ptr(new double);
         *now_ptr = 0.0;
 
-        this->clearBonusTimeouts(type);
+        this->clearBonusTimeouts(BonusType::BonusWave);
 
-        this->timeouts[type] = {
+        this->active_bonuses[BonusType::BonusWave] = true;
+        Stage::bonus_sounds[BonusType::BonusWave].play();
+
+        this->timeouts[BonusType::BonusWave] = {
 
             this->window.setTimeout([=] () {
 
@@ -228,7 +243,7 @@ namespace Breakout {
                 } else if (now < max_time) {
                     Stage::value_wave = Engine::Easing::Quad::InOut(now - mid_time, max_value, -max_value, delta_time);
                 } else {
-                    this->deactivateBonus(type);
+                    this->deactivateBonus(BonusType::BonusWave);
                     return false;
                 }
 
@@ -237,29 +252,34 @@ namespace Breakout {
         };
     }
 
-    void Stage::activateBonusRotate (const Stage::BonusType type) {
+    void Stage::activateBonusRotate (void) {
+
+        std::uniform_real_distribution<double> random_time(20.0, 30.0);
 
         constexpr double
-            max_time = 25.0,
             max_value = Engine::Mesh::PI,
-            mid_time = max_time * 0.05,
-            delta_time = max_time - mid_time,
             timeout_step = 0.01;
 
         const double
+            max_time = random_time(Stage::random_generator),
+            mid_time = max_time * 0.05,
+            delta_time = max_time - mid_time,
             start_value = Stage::value_rotate,
             delta_value = max_value - start_value;
 
         std::shared_ptr<double> now_ptr(new double);
         *now_ptr = 0.0;
 
-        this->clearBonusTimeouts(type);
+        this->clearBonusTimeouts(BonusType::BonusRotate);
+
+        this->active_bonuses[BonusType::BonusRotate] = true;
+        Stage::bonus_sounds[BonusType::BonusRotate].play();
 
         if (start_value != max_value) {
             this->rotate_pause_context = this->window.pause();
         }
 
-        this->timeouts[type] = {
+        this->timeouts[BonusType::BonusRotate] = {
             this->window.setTimeout([=] () {
 
                 const double now = *now_ptr;
@@ -271,13 +291,13 @@ namespace Breakout {
                     this->window.unpause(this->rotate_pause_context);
                     Stage::value_rotate = max_value;
 
-                    this->timeouts[type].push_back(
+                    this->timeouts[BonusType::BonusRotate].push_back(
                         this->window.setTimeout([=] () {
 
                             *now_ptr = 0.0;
                             this->rotate_pause_context = this->window.pause();
 
-                            this->timeouts[type].push_back(
+                            this->timeouts[BonusType::BonusRotate].push_back(
                                 this->window.setTimeout([=] () {
 
                                     const double now = *now_ptr;
@@ -287,7 +307,7 @@ namespace Breakout {
                                         Stage::value_rotate = Engine::Easing::Sine::Out(now, max_value, -max_value, mid_time);
                                     } else {
                                         this->window.unpause(this->rotate_pause_context);
-                                        this->deactivateBonus(type);
+                                        this->deactivateBonus(BonusType::BonusRotate);
                                         return false;
                                     }
 
@@ -306,26 +326,31 @@ namespace Breakout {
         };
     }
 
-    void Stage::activateBonusBall (const Stage::BonusType type) {
+    void Stage::activateBonusBall (void) {
+
+        std::uniform_real_distribution<double> random_time(15.0, 25.0);
 
         constexpr double
-            max_time = 15.0,
-            mid_time = max_time * 0.05,
             max_radius = Ball::DefaultRadius() * 2.0,
-            delta_time = max_time - mid_time,
             back_radius = Ball::DefaultRadius() - max_radius,
             timeout_step = 0.01;
 
         const double
+            max_time = random_time(Stage::random_generator),
+            mid_time = max_time * 0.05,
+            delta_time = max_time - mid_time,
             start_radius = this->getBall()->getRadius(),
             delta_radius = max_radius - start_radius;
 
         std::shared_ptr<double> now_ptr(new double);
         *now_ptr = 0.0;
 
-        this->clearBonusTimeouts(type);
+        this->clearBonusTimeouts(BonusType::BonusBall);
 
-        this->timeouts[type] = {
+        this->active_bonuses[BonusType::BonusBall] = true;
+        Stage::bonus_sounds[BonusType::BonusBall].play();
+
+        this->timeouts[BonusType::BonusBall] = {
 
             this->window.setTimeout([=] () {
 
@@ -337,7 +362,7 @@ namespace Breakout {
                 } else if (now < max_time) {
                     this->getBall()->setRadius(Engine::Easing::Expo::In(now - mid_time, max_radius, back_radius, delta_time));
                 } else {
-                    this->deactivateBonus(type);
+                    this->deactivateBonus(BonusType::BonusBall);
                     return false;
                 }
 
@@ -347,26 +372,31 @@ namespace Breakout {
         };
     }
 
-    void Stage::activateBonusPaddler (const Stage::BonusType type) {
+    void Stage::activateBonusPaddler (void) {
+
+        std::uniform_real_distribution<double> random_time(15.0, 25.0);
 
         constexpr double
-            max_time = 15.0,
-            mid_time = max_time * 0.05,
             max_width = Paddler::DefaultWidth() * 1.5,
-            delta_time = max_time - mid_time,
             back_width = Paddler::DefaultWidth() - max_width,
             timeout_step = 0.01;
 
         const double
+            max_time = random_time(Stage::random_generator),
+            mid_time = max_time * 0.05,
+            delta_time = max_time - mid_time,
             start_width = this->getPaddler()->getWidth(),
             delta_width = max_width - start_width;
 
         std::shared_ptr<double> now_ptr(new double);
         *now_ptr = 0.0;
 
-        this->clearBonusTimeouts(type);
+        this->clearBonusTimeouts(BonusType::BonusPaddler);
 
-        this->timeouts[type] = {
+        this->active_bonuses[BonusType::BonusPaddler] = true;
+        Stage::bonus_sounds[BonusType::BonusPaddler].play();
+
+        this->timeouts[BonusType::BonusPaddler] = {
 
             this->window.setTimeout([=] () {
 
@@ -374,16 +404,138 @@ namespace Breakout {
                 *now_ptr += timeout_step;
 
                 if (now < mid_time) {
-                    this->getPaddler()->setWidth(Engine::Easing::Back::In(now, start_width, delta_width, mid_time));
+                    this->getPaddler()->setWidth(Engine::Easing::Back::Out(now, start_width, delta_width, mid_time));
                 } else if (now < max_time) {
                     this->getPaddler()->setWidth(Engine::Easing::Expo::In(now - mid_time, max_width, back_width, delta_time));
                 } else {
-                    this->deactivateBonus(type);
+                    this->deactivateBonus(BonusType::BonusPaddler);
                     return false;
                 }
 
                 return true;
             }, timeout_step, true)
+        };
+    }
+
+    void Stage::activateBonusFastSpeed (double remaining_time) {
+
+        if (remaining_time <= 0.0) {
+            std::uniform_real_distribution<double> random_remaining_time(30.0, 40.0);
+            remaining_time = random_remaining_time(Stage::random_generator);
+        }
+
+        std::uniform_real_distribution<double> random_time(2.0, 4.0);
+
+        constexpr double
+            max_value = 2.0,
+            timeout_step = 0.01;
+
+        const double
+            max_time = random_time(Stage::random_generator),
+            mid_time = max_time * 0.05,
+            end_time = max_time + mid_time,
+            start_value = this->window.getSpeed(),
+            delta_value = max_value - start_value,
+            back_value = 1.0 - max_value;
+
+        remaining_time -= max_time;
+
+        std::shared_ptr<double> now_ptr(new double);
+        *now_ptr = 0.0;
+
+        this->clearBonusTimeouts(BonusType::BonusFastSpeed);
+        this->deactivateBonus(BonusType::BonusSlowSpeed);
+
+        this->active_bonuses[BonusType::BonusFastSpeed] = true;
+        Stage::bonus_sounds[BonusType::BonusFastSpeed].play();
+
+        this->timeouts[BonusType::BonusFastSpeed] = {
+
+            this->window.setTimeout([=] () {
+
+                const double now = *now_ptr;
+                *now_ptr += timeout_step;
+
+                if (now < mid_time) {
+                    this->window.setSpeed(Engine::Easing::Expo::Out(now, start_value, delta_value, mid_time));
+                } else if (now >= max_time) {
+                    if (remaining_time > 0.0) {
+                        this->deactivateBonus(BonusType::BonusFastSpeed);
+                        this->activateBonusSlowSpeed(remaining_time);
+                        return false;
+                    }
+                    if (now < end_time) {
+                        this->window.setSpeed(Engine::Easing::Expo::Out(now - max_time, max_value, back_value, mid_time));
+                    } else {
+                        this->deactivateBonus(BonusType::BonusFastSpeed);
+                        return false;
+                    }
+                }
+
+                return true;
+            }, timeout_step, true)
+
+        };
+    }
+
+    void Stage::activateBonusSlowSpeed (double remaining_time) {
+
+        if (remaining_time <= 0.0) {
+            std::uniform_real_distribution<double> random_remaining_time(30.0, 40.0);
+            remaining_time = random_remaining_time(Stage::random_generator);
+        }
+
+        std::uniform_real_distribution<double> random_time(4.0, 8.0);
+
+        constexpr double
+            max_value = 0.5,
+            timeout_step = 0.01;
+
+        const double
+            max_time = random_time(Stage::random_generator),
+            mid_time = max_time * 0.05,
+            end_time = max_time + mid_time,
+            start_value = this->window.getSpeed(),
+            delta_value = max_value - start_value,
+            back_value = 1.0 - max_value;
+
+        remaining_time -= max_time;
+
+        std::shared_ptr<double> now_ptr(new double);
+        *now_ptr = 0.0;
+
+        this->clearBonusTimeouts(BonusType::BonusSlowSpeed);
+        this->deactivateBonus(BonusType::BonusFastSpeed);
+
+        this->active_bonuses[BonusType::BonusSlowSpeed] = true;
+        Stage::bonus_sounds[BonusType::BonusSlowSpeed].play();
+
+        this->timeouts[BonusType::BonusSlowSpeed] = {
+
+            this->window.setTimeout([=] () {
+
+                const double now = *now_ptr;
+                *now_ptr += timeout_step;
+
+                if (now < mid_time) {
+                    this->window.setSpeed(Engine::Easing::Expo::Out(now, start_value, delta_value, mid_time));
+                } else if (now >= max_time) {
+                    if (remaining_time > 0.0) {
+                        this->deactivateBonus(BonusType::BonusSlowSpeed);
+                        this->activateBonusFastSpeed(remaining_time);
+                        return false;
+                    }
+                    if (now < end_time) {
+                        this->window.setSpeed(Engine::Easing::Expo::Out(now - max_time, max_value, back_value, mid_time));
+                    } else {
+                        this->deactivateBonus(BonusType::BonusSlowSpeed);
+                        return false;
+                    }
+                }
+
+                return true;
+            }, timeout_step, true)
+
         };
     }
 

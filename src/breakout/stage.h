@@ -26,8 +26,10 @@ namespace Breakout {
             BonusRotate = 1,
             BonusBall = 2,
             BonusPaddler = 3,
+            BonusFastSpeed = 4,
+            BonusSlowSpeed = 5,
 
-            BonusTypeSize = 4
+            BonusTypeSize = 6
 
         };
 
@@ -36,6 +38,7 @@ namespace Breakout {
         static bool active_wave, active_rotate;
         static Engine::Audio::Sound bonus_sounds[];
         static int music_volume;
+        static std::default_random_engine random_generator;
 
         Engine::Audio::Sound music;
         Engine::Window &window;
@@ -81,34 +84,45 @@ namespace Breakout {
                 case BonusType::BonusPaddler:
                     this->getPaddler()->setWidth(Paddler::DefaultWidth());
                 break;
+                case BonusType::BonusFastSpeed:
+                case BonusType::BonusSlowSpeed:
+                    this->window.setSpeed(1.0);
+                break;
                 default: break;
             }
         }
 
-        void activateBonusWave(const BonusType type);
-        void activateBonusRotate(const BonusType type);
-        void activateBonusBall(const BonusType type);
-        void activateBonusPaddler(const BonusType type);
+        void activateBonusWave(void);
+        void activateBonusRotate(void);
+        void activateBonusBall(void);
+        void activateBonusPaddler(void);
+        void activateBonusFastSpeed(double remaining_time = 0.0);
+        void activateBonusSlowSpeed(double remaining_time = 0.0);
 
         void activateBonus (const BonusType type) {
 
             if (!this->cleared) {
-                this->active_bonuses[type] = true;
 
                 switch (type) {
                     case BonusType::BonusWave:
-                        activateBonusWave(type);
+                        activateBonusWave();
                         this->window.setShader(&Stage::shader_wave_rotate);
                     break;
                     case BonusType::BonusRotate:
-                        activateBonusRotate(type);
+                        activateBonusRotate();
                         this->window.setShader(&Stage::shader_wave_rotate);
                     break;
                     case BonusType::BonusBall:
-                        activateBonusBall(type);
+                        activateBonusBall();
                     break;
                     case BonusType::BonusPaddler:
-                        activateBonusPaddler(type);
+                        activateBonusPaddler();
+                    break;
+                    case BonusType::BonusFastSpeed:
+                        activateBonusFastSpeed();
+                    break;
+                    case BonusType::BonusSlowSpeed:
+                        activateBonusSlowSpeed();
                     break;
                     default: break;
                 }
@@ -159,10 +173,8 @@ namespace Breakout {
                 brick = new Brick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type);
             } else if (type < 7) {
                 brick = new BonusBrick(window, { x, y, 4.0 }, bg, [=] (void) {
-                    static std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
                     std::uniform_int_distribution<int> rand(0, BonusType::BonusTypeSize - 1);
-
-                    this->activateBonus(static_cast<BonusType>(rand(gen)));
+                    this->activateBonus(static_cast<BonusType>(rand(Stage::random_generator)));
                 }, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
             } else if (type <= 8) {
                 brick = new AbstractBrick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 7);
