@@ -32,17 +32,20 @@ namespace Breakout {
         };
 
         static Engine::Shader::Program shader_wave_rotate;
-        static double value_wave, value_rotate;
+        static double value_wave, value_rotate, time_wave;
         static bool active_wave, active_rotate;
         static Engine::Audio::Sound bonus_sounds[];
+        static int music_volume;
 
         Engine::Audio::Sound music;
         Engine::Window &window;
         std::unordered_set<Brick *> can_destroy, cannot_destroy;
-        Ball *ball;
-        Paddler *paddler;
+        Ball *ball = nullptr;
+        Paddler *paddler = nullptr;
         std::vector<unsigned> timeouts[static_cast<int>(BonusType::BonusTypeSize)] = { { } };
-        bool active_bonuses[static_cast<int>(BonusType::BonusTypeSize)] = { false };
+        bool cleared = true, win = false, loss = false, active_bonuses[static_cast<int>(BonusType::BonusTypeSize)] = { false };
+        unsigned start_pause_context, rotate_pause_context = 0, lives = 3;
+        double min_speed, max_speed, ball_x, ball_y;
 
         void clearBonusTimeouts (const BonusType type) {
             for (unsigned u : this->timeouts[type]) {
@@ -63,8 +66,10 @@ namespace Breakout {
                         this->window.setShader(nullptr);
                     }
                     Stage::value_wave = 0.0;
+                    Stage::time_wave = 0.0;
                 break;
                 case BonusType::BonusRotate:
+                    this->window.unpause(this->rotate_pause_context);
                     if (!this->active_bonuses[BonusType::BonusWave]) {
                         this->window.setShader(nullptr);
                     }
@@ -87,24 +92,26 @@ namespace Breakout {
 
         void activateBonus (const BonusType type) {
 
-            this->active_bonuses[type] = true;
+            if (!this->cleared) {
+                this->active_bonuses[type] = true;
 
-            switch (type) {
-                case BonusType::BonusWave:
-                    activateBonusWave(type);
-                    this->window.setShader(&Stage::shader_wave_rotate);
-                break;
-                case BonusType::BonusRotate:
-                    activateBonusRotate(type);
-                    this->window.setShader(&Stage::shader_wave_rotate);
-                break;
-                case BonusType::BonusBall:
-                    activateBonusBall(type);
-                break;
-                case BonusType::BonusPaddler:
-                    activateBonusPaddler(type);
-                break;
-                default: break;
+                switch (type) {
+                    case BonusType::BonusWave:
+                        activateBonusWave(type);
+                        this->window.setShader(&Stage::shader_wave_rotate);
+                    break;
+                    case BonusType::BonusRotate:
+                        activateBonusRotate(type);
+                        this->window.setShader(&Stage::shader_wave_rotate);
+                    break;
+                    case BonusType::BonusBall:
+                        activateBonusBall(type);
+                    break;
+                    case BonusType::BonusPaddler:
+                        activateBonusPaddler(type);
+                    break;
+                    default: break;
+                }
             }
         }
 
@@ -154,6 +161,7 @@ namespace Breakout {
                 brick = new BonusBrick(window, { x, y, 4.0 }, bg, [=] (void) {
                     static std::default_random_engine gen(std::chrono::system_clock::now().time_since_epoch().count());
                     std::uniform_int_distribution<int> rand(0, BonusType::BonusTypeSize - 1);
+
                     this->activateBonus(static_cast<BonusType>(rand(gen)));
                 }, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
             } else if (type <= 8) {
@@ -167,84 +175,28 @@ namespace Breakout {
 
         static constexpr double DefaultVerticalSpace = 0.01, DefaultHorizontalSpace = 0.01;
 
-        Stage (Engine::Window &_window, const std::string &file) : window(_window) {
+        Stage (
+            Engine::Window &_window,
+            const std::string &file
+        );
 
-            bool ok;
-            std::ifstream input(file, std::ios::in);
-            std::string block, music_path = "audio/";
-            std::stringstream ss(Stage::nextLine(input, ok));
-            double max_speed, min_speed, width, height, ball_x, ball_y, x, y = 0.9 - (Stage::DefaultVerticalSpace / 2.0);
+        inline ~Stage (void) { this->clear(); }
 
-            ss >> max_speed;
+        void start(void);
+        void clear(void);
 
-            ss.str(Stage::nextLine(input, ok));
-            ss.seekg(0) >> min_speed;
-
-            ss.str(Stage::nextLine(input, ok));
-            ss.seekg(0) >> width;
-
-            ss.str(Stage::nextLine(input, ok));
-            ss.seekg(0) >> height;
-
-            ss.str(Stage::nextLine(input, ok));
-            ss.seekg(0) >> ball_x;
-
-            ss.str(Stage::nextLine(input, ok));
-            ss.seekg(0) >> ball_y;
-
-            music_path += Stage::nextLine(input, ok);
-
-            for (std::string line = Stage::nextLine(input, ok); ok; line = Stage::nextLine(input, ok)) {
-
-                x = -1.0 + (Stage::DefaultHorizontalSpace / 2.0);
-
-                ss.str(line);
-                ss.seekg(0);
-
-                while (ss.good()) {
-
-                    ss >> block;
-
-                    if (block[0] != '-') {
-                        this->addBrick(block, x, y, width, height);
-                    }
-                    x += width + Stage::DefaultHorizontalSpace;
-                }
-                y -= height + Stage::DefaultVerticalSpace;
+        void update (void) {
+            if (this->can_destroy.empty()) {
+                this->clear();
+                this->win = true;
             }
-
-            if (!Stage::shader_wave_rotate) {
-                try {
-                    Stage::shader_wave_rotate.attachVertexShader({ Engine::Shader::wave_rotate_vertex });
-                    Stage::shader_wave_rotate.attachFragmentShader({ Engine::Shader::wave_rotate_fragment });
-                } catch (std::string e) {
-                    std::cerr << e << std::endl;
-                }
-
-                Stage::shader_wave_rotate.link();
-
-                Stage::shader_wave_rotate.onAfterUse([] (Engine::Shader::Program *program) {
-                    glUniform1fARB(program->getUniformLocationARB("parameter_wave"), Stage::value_wave);
-                    glUniform1fARB(program->getUniformLocationARB("parameter_rotate"), Stage::value_rotate);
-                    glUniform1fARB(program->getUniformLocationARB("time"), glfwGetTime());
-                });
-            }
-
-            this->music.load(music_path);
-            this->music.fadeIn(1000, -1);
-
-            this->ball = new Ball(max_speed, min_speed);
-            this->window.addObject(this->ball);
-
-            this->paddler = new Paddler(this->window, max_speed / 1.5);
-            this->window.addObject(this->paddler);
         }
 
-        ~Stage () {
+        inline bool isClear (void) const { return this->cleared; }
+        inline bool won (void) const { return this->win; }
+        inline bool lost (void) const { return this->loss; }
 
-        }
-
-        void addBrick (const std::string &id, double x, double y, double width, double height) {
+        inline void addBrick (const std::string &id, double x, double y, double width, double height) {
 
             Brick *brick = Stage::createBrickByID(this->window, id, x, y, width, height);
 
@@ -254,7 +206,6 @@ namespace Breakout {
                 } else {
                     this->cannot_destroy.insert(brick);
                 }
-                this->window.addObject(brick);
             }
         }
 
