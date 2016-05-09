@@ -2,7 +2,7 @@
 
 CXX = c++
 CXXFLAGS = -std=c++11 -g -Wall -O3 -Wno-missing-braces
-CXXLIBS = -lglfw3
+CXXLIBS = -lglfw3 -lpng
 SRC := main.cc\
  engine/object.cc engine/mesh.cc engine/background.cc engine/event.cc engine/color.cc engine/window.cc engine/shader.cc engine/audio.cc\
  breakout/brick.cc breakout/game.cc breakout/stage.cc breakout/ball.cc
