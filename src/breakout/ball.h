@@ -7,6 +7,8 @@
 #include <chrono>
 #include <cmath>
 #include "brick.h"
+#include "paddler.h"
+#include "../engine/event.h"
 #include "../engine/object.h"
 #include "../engine/audio.h"
 
@@ -14,7 +16,7 @@ namespace Breakout {
 
     class Ball : public Engine::Object {
 
-        std::valarray<double> start_position;
+        const std::valarray<double> start_position;
         std::unique_ptr<Engine::Sphere2D> sphere_mesh, sphere_collider;
         std::unique_ptr<Engine::BackgroundColor> background_color;
         double max_speed, min_speed;
@@ -23,7 +25,6 @@ namespace Breakout {
             sound_brick = Engine::Audio::Sound("audio/effects/ball_brick.ogg");
 
         std::function<void(void)> touch_bottom;
-        std::function<void(const Brick *)> on_destroy;
 
     public:
 
@@ -35,15 +36,14 @@ namespace Breakout {
             double _max_speed,
             double _min_speed,
             std::function<void(void)> _touch_bottom,
-            std::function<void(const Brick *)> _on_destroy,
-            const std::valarray<double> &_start_position = { 0.0, 0.0, 0.0 }
+            const std::valarray<double> &_position = { 0.0, 0.0, 0.0 }
         ) : Engine::Object(
-            _start_position,
+            _position,
             true,
             new Engine::Sphere2D({ 0.0, 0.0, 0.0 }, Ball::DefaultRadius()),
             new Engine::Sphere2D({ 0.0, 0.0, 0.0 }, Ball::DefaultRadius()),
             new Engine::BackgroundColor(Engine::Color::rgba(255, 255, 255, 0.5))
-        ), start_position(_start_position), max_speed(_max_speed), min_speed(_min_speed), touch_bottom(_touch_bottom), on_destroy(_on_destroy) {
+        ), start_position(_position), max_speed(_max_speed), min_speed(_min_speed), touch_bottom(_touch_bottom) {
 
             this->sphere_mesh.reset(static_cast<Engine::Sphere2D *>(this->getMesh()));
             this->sphere_collider.reset(static_cast<Engine::Sphere2D *>(this->getCollider()));

@@ -28,14 +28,21 @@ namespace Breakout {
             }
 
             if (is_brick) {
-                this->on_destroy(static_cast<const Brick *>(other));
                 this->sound_brick.play();
                 // deacelerate
                 this->setSpeed(speed * 0.9);
             } else {
+                const double
+                    offset_x = point[0] - (other->getPosition()[0] + other->getCollider()->getPosition()[0]),
+                    width = static_cast<const Paddler *>(other)->getWidth(),
+                    proportion = std::max((std::abs(((offset_x + offset_x) / width) - 1.0) * 1.2), 0.8),
+                    mouse_y = std::max(std::min(Engine::Event::MouseMove::getMousePosY() + 2.0, 3.0), 1.0) * 0.5;
+
+                std::cout << proportion << std::endl;
+
                 this->sound_pop.play();
                 // add paddler speed
-                this->setSpeed(speed + (other->getSpeed() * 0.8));
+                this->setSpeed((speed + (other->getSpeed() * 0.8)) * proportion * mouse_y);
             }
         }
     }
