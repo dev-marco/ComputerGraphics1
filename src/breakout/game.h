@@ -11,12 +11,16 @@ namespace Breakout {
 
         Engine::Window &window;
         std::queue<Stage *> stages;
+        bool won = false, lost = false;
+        Engine::Audio::Sound sound_win, sound_lose;
+        GLuint texture_win, texture_lose;
 
-        inline void nextStage (void) const {
+        inline void nextStage (void) {
             if (!this->stages.empty()) {
                 this->stages.front()->start();
             } else {
-                std::cout << "YOU WIN" << std::endl;
+                this->sound_win.play();
+                this->won = true;
             }
         }
 
@@ -28,7 +32,7 @@ namespace Breakout {
 
         void clear(void);
 
-        inline void start (void) const { this->nextStage(); }
+        inline void start (void) { this->nextStage(); }
 
         inline void update (void) {
             if (!this->stages.empty()) {
@@ -39,9 +43,14 @@ namespace Breakout {
                     this->nextStage();
                     delete stage;
                 } else if (stage->lost()) {
-                    std::cout << "YOU LOSE" << std::endl;
+                    this->sound_lose.play();
+                    this->lost = true;
                     this->clear();
                 }
+            } else if (this->won) {
+                this->window.addTexture2D(this->texture_win, 1.0, 2.0, { -0.5, -1.0, 4.0 });
+            } else if (this->lost) {
+                this->window.addTexture2D(this->texture_lose, 2.0, 1.0, { -1.0, -0.5, 4.0 });
             }
         }
 
