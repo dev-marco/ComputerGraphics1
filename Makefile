@@ -6,7 +6,7 @@ CXXLIBS = -lglfw3 -lpng
 SRC := main.cc\
  engine/object.cc engine/mesh.cc engine/background.cc engine/event.cc engine/color.cc engine/window.cc engine/shader.cc engine/audio.cc\
  breakout/brick.cc breakout/game.cc breakout/stage.cc breakout/ball.cc
-STAGES := stages/level_00.brk
+STAGES := stages/level_0*.brk
 OBJ := $(SRC:%.cc=build/%.o)
 DEP := $(SRC:%.cc=deps/%.d)
 NAME = tp1
