@@ -19,6 +19,7 @@ namespace Breakout {
         unsigned lives;
         bool draw_border;
         std::unique_ptr<Engine::Rectangle2D> rect_mesh, rect_collider;
+        std::function<void(Brick *)> on_destroy;
 
     public:
 
@@ -28,6 +29,7 @@ namespace Breakout {
             Engine::Window &_window,
             const std::valarray<double> &_position,
             Engine::Background *_background,
+            std::function<void(Brick *)> _on_destroy,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
             const std::valarray<double> &_speed = {0.0, 0.0, 0.0},
@@ -39,7 +41,7 @@ namespace Breakout {
             new Engine::Rectangle2D({0.0, 0.0, 0.0}, _width, _height),
             new Engine::Rectangle2D({0.0, 0.0, 0.0}, _width, _height),
             _background, _speed, _acceleration
-        ), window(_window), width(_width), height(_height), lives(_lives), draw_border(_draw_border) {
+        ), window(_window), width(_width), height(_height), lives(_lives), draw_border(_draw_border), on_destroy(_on_destroy) {
 
             this->rect_mesh.reset(static_cast<Engine::Rectangle2D *>(this->getMesh()));
             this->rect_collider.reset(static_cast<Engine::Rectangle2D *>(this->getCollider()));
@@ -66,6 +68,7 @@ namespace Breakout {
                 --this->lives;
 
                 if (this->lives == 0) {
+                    this->on_destroy(this);
                     this->destroy();
                 } else {
                     this->onChangeLives();
@@ -98,18 +101,21 @@ namespace Breakout {
             const std::valarray<double> &_position,
             Engine::Background *_background,
             std::function<void(void)> _bonus_function,
+            std::function<void(Brick *)> _on_destroy,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
             const std::valarray<double> &_speed = {0.0, 0.0, 0.0},
             const std::valarray<double> &_acceleration = {0.0, 0.0, 0.0},
             unsigned _lives = 1
         ) :
-            Brick(_window, _position, _background, _width, _height, _speed, _acceleration, _lives, true),
+            Brick(_window, _position, _background, _on_destroy, _width, _height, _speed, _acceleration, _lives, true),
             bonus_function(_bonus_function) {}
 
-        void beforeDestroy (void) {
-            Brick::beforeDestroy();
-            this->bonus_function();
+        inline void onCollision (const Object *other, const std::valarray<double> &point) {
+            Brick::onCollision(other, point);
+            if (this->getLives() == 0) {
+                this->bonus_function();
+            }
         }
 
         std::string brickType (void) const { return "bonus_brick"; }
@@ -126,12 +132,13 @@ namespace Breakout {
             Engine::Window &_window,
             const std::valarray<double> &_position,
             Engine::BackgroundColor *_background,
+            std::function<void(Brick *)> _on_destroy,
             double _width = Brick::DefaultWidth,
             double _height = Brick::DefaultHeight,
             const std::valarray<double> &_speed = {0.0, 0.0, 0.0},
             const std::valarray<double> &_acceleration = {0.0, 0.0, 0.0},
             unsigned _lives = 1
-        ) : Brick(_window, _position, _background, _width, _height, _speed, _acceleration, _lives, false), color(_background) {
+        ) : Brick(_window, _position, _background, _on_destroy, _width, _height, _speed, _acceleration, _lives, false), color(_background) {
             if (this->isDestructible()) {
                 this->color->setA(0.25);
             } else {
