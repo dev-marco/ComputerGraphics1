@@ -46,8 +46,15 @@ namespace Breakout {
         Ball *ball = nullptr;
         Paddler *paddler = nullptr;
         std::vector<unsigned> timeouts[static_cast<int>(BonusType::BonusTypeSize)] = { { } };
-        bool cleared = true, win = false, loss = false, active_bonuses[static_cast<int>(BonusType::BonusTypeSize)] = { false };
-        unsigned start_pause_context, rotate_pause_context = 0, lives = 3;
+        bool
+            cleared = true,
+            win = false,
+            loss = false,
+            debug_mode = false,
+            debug_status = false,
+            debug_last_status = false,
+            active_bonuses[static_cast<int>(BonusType::BonusTypeSize)] = { false };
+        unsigned start_pause_context, destructible, rotate_pause_context = 0, lives = 3;
         double min_speed, max_speed, ball_x, ball_y;
 
         void clearBonusTimeouts (const BonusType type) {
@@ -166,18 +173,21 @@ namespace Breakout {
 
             unsigned divisor = id.find_first_of('#'), type = stoul(id.substr(0, divisor));
             Brick *brick = nullptr;
+            std::function<void(Brick *)> on_destroy = [ this ] (Brick *destroyed) {
+                this->can_destroy.erase(destroyed);
+            };
 
             Engine::BackgroundColor *bg = new Engine::BackgroundColor(Engine::Color::hex(id.substr(divisor)));
 
             if (type < 4) {
-                brick = new Brick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type);
+                brick = new Brick(window, { x, y, 4.0 }, bg, on_destroy, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type);
             } else if (type < 7) {
                 brick = new BonusBrick(window, { x, y, 4.0 }, bg, [=] (void) {
                     std::uniform_int_distribution<int> rand(0, BonusType::BonusTypeSize - 1);
                     this->activateBonus(static_cast<BonusType>(rand(Stage::random_generator)));
-                }, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
+                }, on_destroy, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 3);
             } else if (type <= 8) {
-                brick = new AbstractBrick(window, { x, y, 4.0 }, bg, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 7);
+                brick = new AbstractBrick(window, { x, y, 4.0 }, bg, on_destroy, width, height, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, type - 7);
             }
 
             return brick;
@@ -197,16 +207,55 @@ namespace Breakout {
         void start(void);
         void clear(void);
 
+        void debugInfo (std::ostream &out) {
+            out << "Paddler:" << std::endl;
+            this->paddler->debugInfo(out, " ");
+
+            out << "Ball:" << std::endl;
+            this->ball->debugInfo(out, " ");
+
+            out << "Indestructible bricks:" << std::endl;
+            for (const auto &brick : this->cannot_destroy) {
+                brick->debugInfo(out, " ");
+            }
+
+            out << "Destructible bricks:" << std::endl;
+            for (const auto &brick : this->can_destroy) {
+                brick->debugInfo(out, " ");
+            }
+        }
+
         void update (void) {
+
+            static GLuint heart_texture = loadPNG("images/life.png");
+            double x = 0.7;
+            this->window.drawNumber(this->destructible - this->can_destroy.size(), 0.15, { -1.0, 0.85, 4.0 });
+
+            for (unsigned i = 0; i < this->lives; ++i) {
+                this->window.addTexture2D(heart_texture, 0.1, 0.1, { x, 0.88, 4.0 });
+                x += 0.1;
+            }
+
             if (this->can_destroy.empty()) {
                 this->clear();
                 this->win = true;
+            }
+            if (this->debug_mode) {
+                if (this->debug_last_status != this->debug_status) {
+                    this->debug_last_status = this->debug_status;
+                    this->debugInfo(std::cout);
+                    this->window.unpause(this->start_pause_context);
+                } else {
+                    this->window.pause(this->start_pause_context);
+                }
             }
         }
 
         inline bool isClear (void) const { return this->cleared; }
         inline bool won (void) const { return this->win; }
         inline bool lost (void) const { return this->loss; }
+
+        inline void reset (void) { this->window.pause(this->start_pause_context); this->ball->stop(), this->ball->start(), this->paddler->stop(), this->paddler->start(); }
 
         inline void addBrick (const std::string &id, double x, double y, double width, double height) {
 

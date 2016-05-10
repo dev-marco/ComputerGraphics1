@@ -66,6 +66,8 @@ namespace Breakout {
                 y -= height + Stage::DefaultVerticalSpace;
             }
 
+            this->destructible = this->can_destroy.size();
+
             input.close();
 
             if (!Stage::shader_wave_rotate) {
@@ -90,6 +92,10 @@ namespace Breakout {
                 Stage::bonus_sounds[BonusType::BonusPaddler].load("audio/bonus/mario_mushroom.ogg");
                 Stage::bonus_sounds[BonusType::BonusFastSpeed].load("audio/bonus/acelera_acelera.ogg");
                 Stage::bonus_sounds[BonusType::BonusSlowSpeed].load("audio/bonus/vai_devagar.ogg");
+
+                for (auto &sound : Stage::bonus_sounds) {
+                    sound.setVolume(16);
+                }
             }
         }
     }
@@ -102,24 +108,20 @@ namespace Breakout {
 
         } else {
 
-            this->start_pause_context = this->window.pause();
-
             this->music.setVolume(Stage::music_volume);
 
-            this->window.eraseEvent<Engine::Event::Keyboard>("keyboard.pause");
+            this->window.pause(this->start_pause_context);
 
+            this->window.eraseEvent<Engine::Event::Keyboard>("keyboard.pause");
             this->window.event<Engine::Event::Keyboard>([ this ] (GLFWwindow *window, int key, int code, int action, int mods) {
                 if (action == GLFW_PRESS || action == GLFW_REPEAT) {
 
                     if (action == GLFW_PRESS) {
-                        if (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_ENTER) {
-                            if (this->window.isPaused()) {
-                                this->window.unpause(this->start_pause_context);
-                                this->music.play();
-                            } else {
-                                this->start_pause_context = this->window.pause();
-                                this->music.pause();
-                            }
+
+                        if (key == GLFW_KEY_Q) {
+                            this->window.close();
+                        } else if (key == GLFW_KEY_R) {
+                            this->reset();
                         }
                     }
 
@@ -141,22 +143,45 @@ namespace Breakout {
                 }
             }, "keyboard.pause");
 
+            this->window.eraseEvent<Engine::Event::MouseClick>("mouseclick.pause");
+            this->window.event<Engine::Event::MouseClick>([ this ] (GLFWwindow *window, int key, int action, int mods) {
+
+                if (action == GLFW_PRESS) {
+
+                    if (key == GLFW_MOUSE_BUTTON_LEFT) {
+                        if (this->window.isPaused()) {
+                            this->window.unpause(this->start_pause_context);
+                            this->music.play();
+                            this->debug_mode = false;
+                            this->debug_last_status = false;
+                            this->debug_status = false;
+                        } else {
+                            this->window.pause(this->start_pause_context);
+                            this->music.pause();
+                        }
+                    } else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
+                        if (!this->window.isPaused()) {
+                            this->window.pause(this->start_pause_context);
+                            this->music.pause();
+                        }
+                        this->debug_mode = true;
+                        this->debug_status = !this->debug_status;
+                    }
+                }
+            }, "mouseclick.pause");
+
             this->ball = new Ball(this->max_speed, this->min_speed, [ this ] () {
 
                 if (this->lives > 1) {
-                    this->ball->start();
+                    this->reset();
                     --this->lives;
                 } else {
                     this->loss = true;
                 }
 
-            }, [ this ] (const Breakout::Brick *destroyed) {
-
-                this->can_destroy.erase(const_cast<Breakout::Brick *>(destroyed));
-
             }, { this->ball_x, this->ball_y, 4.0 });
 
-            this->paddler = new Paddler(this->window, this->max_speed / 1.5);
+            this->paddler = new Paddler(this->window, this->max_speed / 1.5, { 0.0, -0.9, 4.0 });
 
             for (auto &brick : this->can_destroy) {
                 this->window.addObject(brick);
@@ -181,6 +206,7 @@ namespace Breakout {
         }
 
         this->window.eraseEvent<Engine::Event::Keyboard>("keyboard.pause");
+        this->window.eraseEvent<Engine::Event::MouseClick>("mouseclick.pause");
 
         if (!this->cleared) {
 
@@ -276,7 +302,7 @@ namespace Breakout {
         Stage::bonus_sounds[BonusType::BonusRotate].play();
 
         if (start_value != max_value) {
-            this->rotate_pause_context = this->window.pause();
+            this->window.pause(this->rotate_pause_context);
         }
 
         this->timeouts[BonusType::BonusRotate] = {
@@ -295,7 +321,7 @@ namespace Breakout {
                         this->window.setTimeout([=] () {
 
                             *now_ptr = 0.0;
-                            this->rotate_pause_context = this->window.pause();
+                            this->window.pause(this->rotate_pause_context);
 
                             this->timeouts[BonusType::BonusRotate].push_back(
                                 this->window.setTimeout([=] () {
