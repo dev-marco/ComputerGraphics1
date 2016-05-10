@@ -30,16 +30,11 @@ int main (int argc, char **argv) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         window.swapBuffers();
+        glClear(0);
 
         glewInit();
 
-        for (int i = 1; i < argc; ++i) {
-            stages.push_back(argv[i]);
-        }
-
-        Breakout::Game game(window, stages);
-
-        game.start();
+        glShadeModel(GL_SMOOTH);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -50,7 +45,15 @@ int main (int argc, char **argv) {
         glEnable(GL_ALPHA_TEST);
         glAlphaFunc(GL_GREATER, 0.0);
 
-        glShadeModel(GL_SMOOTH);
+        glDisable(GL_LIGHTING);
+
+        for (int i = 1; i < argc; ++i) {
+            stages.push_back(argv[i]);
+        }
+
+        Breakout::Game game(window, stages);
+
+        game.start();
 
         while (!window.shouldClose()) {
             int width, height;
@@ -73,6 +76,7 @@ int main (int argc, char **argv) {
             window.update();
 
             window.swapBuffers();
+            glClear(0);
             glfwPollEvents();
 
             game.update();
@@ -82,10 +86,14 @@ int main (int argc, char **argv) {
                 std::cout << fps << " FPS" << std::endl;
             }
         }
+
+        game.clear();
+        window.update();
+
+        Engine::Audio::End();
     } else {
         std::cerr << "ERROR: Could not initialize window" << std::endl;
     }
-
     glfwTerminate();
 
     return 0;
